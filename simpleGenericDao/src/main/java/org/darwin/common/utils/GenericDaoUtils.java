@@ -10,9 +10,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -473,13 +476,21 @@ public class GenericDaoUtils {
 	}
 
 	/**
-	 * 判断一个类型，是否是java提供的类型
+	 * 判断一个类型，是否是java提供的原生类型
 	 * 
 	 * @param type
 	 * @return created by Tianxin on 2015年6月1日 上午10:53:56
 	 */
 	private static boolean isTypeFromJdk(Class<?> type) {
-		// TODO 这里暂时不实现
+		if(type.isPrimitive()){
+		}else if(type.getPackage().getName().startsWith("java.lang")){
+		}else if(Date.class.isAssignableFrom(type)){
+		}else if(BigDecimal.class.isAssignableFrom(type)){
+		}else if(URL.class.isAssignableFrom(type)){
+		//以上几种都不是，则证明非原生类型
+		}else {
+			return false;
+		}
 		return true;
 	}
 

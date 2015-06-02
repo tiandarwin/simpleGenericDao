@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -87,7 +88,20 @@ public class EntityMapper<ENTITY extends BaseObject<?>> implements RowMapper<ENT
 	 * @throws SQLException
 	 */
 	private Object getObjectForType(ResultSet rs, String column, Class<?> rClass) throws SQLException {
+		
+		//尝试快速获取到字段值
+		try{
+			//加载到
+			Class<?> rsClass = rs.getClass();
+			Map<Class<?>, Method> typeMethodMap = ensureTypeMethod(rsClass);
+			Method m = typeMethodMap.get(rClass);
+			if(m != null){
+				return m.invoke(rs, column);
+			}
+		}catch(Exception e){
+		}
 
+		//如果无法快速获取，则通过一串的类型判断来获取
 		// 如果是基本类型
 		if (rClass.isPrimitive()) {
 			if (Integer.TYPE.isAssignableFrom(rClass)) {
@@ -146,5 +160,71 @@ public class EntityMapper<ENTITY extends BaseObject<?>> implements RowMapper<ENT
 		}
 		return rs.getObject(column);
 	}
+	
+	/**
+	 * resultset可能有多个实现，所以这里要根据实际的resultSet的class来获取一个getXXX的方法map
+	 * @param rsClass
+	 * @return
+	 * @throws NoSuchMethodException
+	 */
+	private static Map<Class<?>, Method> ensureTypeMethod(Class<?> rsClass) throws NoSuchMethodException {
+		Map<Class<?>, Method> typeMethodMap = rsTypeMethodMap.get(rsClass);
+		if(typeMethodMap != null){
+			return typeMethodMap;
+		}
+		
+		typeMethodMap = new HashMap<Class<?>, Method>();
+		loadTypeMethods(typeMethodMap, rsClass);
+		rsTypeMethodMap.put(rsClass, typeMethodMap);
+		return typeMethodMap;
+	}
+
+	/**
+	 * 将某一个ResultSet的类解析为一个类型和对应getInt的方法集
+	 * @param typeMethodMap
+	 * @param rsClass
+	 * @throws NoSuchMethodException
+	 */
+	private static void loadTypeMethods(Map<Class<?>, Method> typeMethodMap,
+			Class<?> rsClass) throws NoSuchMethodException {
+		
+		typeMethodMap.put(Integer.TYPE, getParamStringMethod(rsClass, "getInt"));
+		typeMethodMap.put(Integer.class, getParamStringMethod(rsClass, "getInt"));
+		typeMethodMap.put(Long.TYPE, getParamStringMethod(rsClass, "getLong"));
+		typeMethodMap.put(Long.class, getParamStringMethod(rsClass, "getLong"));
+		typeMethodMap.put(Double.TYPE, getParamStringMethod(rsClass, "getDouble"));
+		typeMethodMap.put(Double.class, getParamStringMethod(rsClass, "getDouble"));
+		typeMethodMap.put(Float.TYPE, getParamStringMethod(rsClass, "getFloat"));
+		typeMethodMap.put(Float.class, getParamStringMethod(rsClass, "getFloat"));
+		typeMethodMap.put(Short.TYPE, getParamStringMethod(rsClass, "getShort"));
+		typeMethodMap.put(Short.class, getParamStringMethod(rsClass, "getShort"));
+		typeMethodMap.put(Boolean.TYPE, getParamStringMethod(rsClass, "getBoolean"));
+		typeMethodMap.put(Boolean.class, getParamStringMethod(rsClass, "getBoolean"));
+		typeMethodMap.put(Byte.TYPE, getParamStringMethod(rsClass, "getByte"));
+		typeMethodMap.put(Byte.class, getParamStringMethod(rsClass, "getByte"));
+		typeMethodMap.put(String.class, getParamStringMethod(rsClass, "getString"));
+		typeMethodMap.put(java.util.Date.class, getParamStringMethod(rsClass, "getTimestamp"));
+		typeMethodMap.put(Timestamp.class, getParamStringMethod(rsClass, "getTimestamp"));
+		typeMethodMap.put(Time.class, getParamStringMethod(rsClass, "getTime"));
+		typeMethodMap.put(Date.class, getParamStringMethod(rsClass, "getDate"));
+		typeMethodMap.put(BigDecimal.class, getParamStringMethod(rsClass, "getBigDecimal"));
+		typeMethodMap.put(URL.class, getParamStringMethod(rsClass, "getURL"));
+	}
+
+	/**
+	 * 根据getXXX的方法名获取参数为字符串的方法
+	 * @param rsClass
+	 * @param methodName
+	 * @return
+	 * @throws NoSuchMethodException
+	 */
+	private static Method getParamStringMethod(Class<?> rsClass, String methodName) throws NoSuchMethodException {
+		return rsClass.getMethod(methodName, String.class);
+	}
+
+	/**
+	 * 第一层key是ResultSet的class,第二层key是setter的参数类型的class，value是rs.getXXX的方法
+	 */
+	private final static Map<Class<?>, Map<Class<?>, Method>> rsTypeMethodMap = new HashMap<Class<?>, Map<Class<?>,Method>>();
 
 }
