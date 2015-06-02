@@ -16,7 +16,7 @@ public class TestGenericTypes extends Middle<Integer, Object> {
 		paramize(TestGenericTypes.class.getSuperclass());
 	}
 	
-	public static void paramize(Class clazz){
+	public static void paramize(Class<?> clazz){
 		Type type = clazz.getGenericSuperclass();
 		if(type == null){
 			System.out.println(clazz.toString() + " null ");

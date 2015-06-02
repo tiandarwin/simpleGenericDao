@@ -70,7 +70,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 		}
 
 		// 获取sql以及参数
-		List<ENTITY> entities = toEntities(entity);
+		List<ENTITY> entities = GenericDaoUtils.toEntities(entity);
 		final String sql = queryHandler.generateInsertSQL(entities);
 		final Object[] params = queryHandler.generateInsertParams(entities);
 		
@@ -116,20 +116,42 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 		if (entities == null || entities.size() == 0) {
 			return 0;
 		}
-		
-		//TODO 这里应该有一个分支，批量插入并且全部都获取key的做法
 
 		String sql = queryHandler.generateInsertSQL(entities);
 		Object[] params = queryHandler.generateInsertParams(entities);
 		return jdbcTemplate.update(sql, params);
 	}
-
-	public boolean replace(ENTITY entity) {
-		if (entity == null) {
-			return false;
+	
+	/**
+	 * 该方法会对ENTITY逐条插入，每插入一条时会获取一下数据库中生成的key
+	 * @param entities
+	 * @return
+	 */
+	public int createAndFetchKey(Collection<ENTITY> entities) {
+		if (entities == null || entities.size() == 0) {
+			return 0;
 		}
-		// TODO 暂不实现，意义不大
-		return false;
+		
+		int createdCount = 0;
+		for(ENTITY entity :entities){
+			createdCount += create(entity) ? 1 : 0;
+		}
+		return createdCount;
+	}
+
+	public int replace(Collection<ENTITY> entities) {
+		if (entities == null) {
+			return 0;
+		}
+		
+		// 获取sql以及参数
+		String sql = queryHandler.generateInsertSQL(entities);
+		Object[] params = queryHandler.generateInsertParams(entities);
+		
+		// 只是将insert替换成replace就变成了replace的SQL语句
+		sql = sql.replaceFirst("insert", "replace");
+		
+		return jdbcTemplate.update(sql, params);
 	}
 
 	public boolean update(ENTITY entity) {
@@ -145,7 +167,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	public int update(Collection<ENTITY> entities) {
 
 		// 如果为空或这个集合都是空对象，则不更新
-		final ArrayList<ENTITY> list = trimEntities(entities);
+		final List<ENTITY> list = GenericDaoUtils.trimEntities(entities);
 		if (list == null || list.size() == 0) {
 			return 0;
 		}
@@ -165,40 +187,13 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 				return list.size();
 			}
 		});
-
-		return sum(results);
-	}
-
-	/**
-	 * 将数组内的元素加总
-	 * 
-	 * @param results
-	 * @return created by Tianxin on 2015年5月28日 下午4:42:02
-	 */
-	private int sum(int[] results) {
-		int total = 0;
+		
+		//计算影响的数据条数
+		int updatedCount = 0;
 		for (int i : results) {
-			total += i;
+			updatedCount += i;
 		}
-		return total;
-	}
-
-	/**
-	 * @param entities
-	 * @return created by Tianxin on 2015年5月28日 下午4:29:02
-	 */
-	private ArrayList<ENTITY> trimEntities(Collection<ENTITY> entities) {
-		if (entities == null || entities.size() == 0) {
-			return null;
-		}
-
-		ArrayList<ENTITY> list = new ArrayList<ENTITY>(entities.size());
-		for (ENTITY e : entities) {
-			if (e != null) {
-				list.add(e);
-			}
-		}
-		return list;
+		return updatedCount;
 	}
 
 	public boolean delete(KEY id) {
@@ -217,27 +212,13 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	}
 
 	public int delete(Collection<ENTITY> entities) {
-		entities = trimEntities(entities);
+		entities = GenericDaoUtils.trimEntities(entities);
 		if (entities == null || entities.size() == 0) {
 			return 0;
 		}
 
-		List<KEY> ids = extractKeys(entities);
+		List<KEY> ids = GenericDaoUtils.extractKeys(entities);
 		return delete(configKeeper.keyColumn(), ids);
-	}
-
-	/**
-	 * @param entities
-	 * @return created by Tianxin on 2015年5月28日 下午6:03:43
-	 */
-	private List<KEY> extractKeys(Collection<ENTITY> entities) {
-
-		// TODO 这些private的方法该放在哪里
-		List<KEY> keys = new ArrayList<KEY>(entities.size());
-		for (ENTITY entity : entities) {
-			keys.add(entity.getId());
-		}
-		return keys;
 	}
 
 	public int deleteByKeys(Collection<KEY> ids) {
@@ -406,12 +387,6 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 			list.add(o);
 		}
 		return list;
-	}
-
-	private List<ENTITY> toEntities(ENTITY entity) {
-		List<ENTITY> entities = new ArrayList<ENTITY>(1);
-		entities.add(entity);
-		return entities;
 	}
 
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {

@@ -151,7 +151,7 @@ public class QueryHandler<KEY extends Serializable, ENTITY extends BaseObject<KE
 		sb.deleteCharAt(sb.length() - 1);
 		return sb.toString();
 	}
-
+	
 	/**
 	 * 生成update的参数列表
 	 * 

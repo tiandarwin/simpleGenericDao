@@ -5,6 +5,7 @@
 	<artifactId>simpleGenericDao</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>springGenericDao</name>
+	<packaging>jar</packaging>
 	<description>利用SpringJdbcTemplate实现的一套dao框架</description>
 
 	<repositories>
@@ -147,4 +148,75 @@
 		</dependency>
 
 	</dependencies>
+
+	<build>
+		<defaultGoal>package</defaultGoal>
+		<finalName>${project.artifactId}</finalName>
+		<outputDirectory>target/classes</outputDirectory>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>*.properties</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>make-sdk-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>sdk</classifier>
+							<includes>
+								<include>**/bo/*</include>
+							</includes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>online</id>
+			<build>
+				<resources>
+					<resource>
+						<directory>${project.build.online.sourceDir}</directory>
+						<excludes>
+							<exclude>*.properties</exclude>
+						</excludes>
+					</resource>
+
+					<resource>
+						<directory>${project.build.sourceDirectory}</directory>
+						<excludes>
+							<exclude>**/*.java</exclude>
+						</excludes>
+					</resource>
+				</resources>
+			</build>
+		</profile>
+	</profiles>
 </project>

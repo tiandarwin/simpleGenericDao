@@ -11,6 +11,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,8 +24,6 @@ import org.darwin.genericDao.annotations.Table.ColumnStyle;
 import org.darwin.genericDao.bo.BaseObject;
 import org.darwin.genericDao.mapper.BasicMappers;
 import org.darwin.genericDao.mapper.ColumnMapper;
-import org.darwin.samples.Plan;
-import org.darwin.samples.test.TestGenericTypes;
 
 /**
  * 反射的方法工具集 created by Tianxin on 2015年5月28日 下午10:00:11
@@ -38,7 +37,8 @@ public class GenericDaoUtils {
 	 * @return created by Tianxin on 2015年5月31日 下午10:51:37
 	 */
 	@SuppressWarnings("unchecked")
-	public static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> Class<ENTITY> getEntityClass(Class<?> subGenericDaoClass) {
+	public static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> Class<ENTITY> getEntityClass(
+			Class<?> subGenericDaoClass) {
 
 		// TODO 这个方法里面有一些漏洞，应该从GenericDao类向下追溯，根据语法规则找到准确的语法指定的泛型，而不是底向上回溯
 
@@ -61,7 +61,8 @@ public class GenericDaoUtils {
 
 				// 如果是BaseObject的子类，则直接返回即可
 				Class<?> typeClass = (Class<?>) type;
-				boolean isBaseObjectClass = BaseObject.class.isAssignableFrom(typeClass);
+				boolean isBaseObjectClass = BaseObject.class
+						.isAssignableFrom(typeClass);
 				if (isBaseObjectClass) {
 					return (Class<ENTITY>) typeClass;
 				}
@@ -79,7 +80,8 @@ public class GenericDaoUtils {
 	 * @return created by Tianxin on 2015年5月31日 下午10:51:37
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static <KEY extends Serializable> Class<KEY> getKeyClass(Class entityClass) {
+	public static <KEY extends Serializable> Class<KEY> getKeyClass(
+			Class entityClass) {
 
 		// TODO 这个方法里面有一些漏洞，应该从GenericDao类向下追溯，根据语法规则找到准确的语法指定的泛型，而不是底向上回溯
 
@@ -102,7 +104,8 @@ public class GenericDaoUtils {
 
 				// 如果是BaseObject的子类，则直接返回即可
 				Class<?> typeClass = (Class<?>) type;
-				boolean isKeyClass = Serializable.class.isAssignableFrom(typeClass);
+				boolean isKeyClass = Serializable.class
+						.isAssignableFrom(typeClass);
 				if (isKeyClass) {
 					return (Class<KEY>) typeClass;
 				}
@@ -155,8 +158,8 @@ public class GenericDaoUtils {
 	 * @param entityClass
 	 * @return created by Tianxin on 2015年6月1日 上午10:26:05
 	 */
-	public static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> Map<String, ColumnMapper> generateColumnMappers(Class<ENTITY> entityClass,
-			ColumnStyle columnStyle) {
+	public static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> Map<String, ColumnMapper> generateColumnMappers(
+			Class<ENTITY> entityClass, ColumnStyle columnStyle) {
 
 		// 获取get方法、set方法、属性的列表
 		List<Field> fields = getAllFields(entityClass);
@@ -168,11 +171,13 @@ public class GenericDaoUtils {
 		Map<String, Method> setterMap = trans2SetterMap(setters);
 
 		// 以getter方法做循环，找到配对的方法和属性信息
-		Map<String, ColumnMapper> columnMappers = new HashMap<String, ColumnMapper>(50);
+		Map<String, ColumnMapper> columnMappers = new HashMap<String, ColumnMapper>(
+				50);
 		for (Method getter : getters) {
 
 			// 推导对一个的setter名字与field名字
-			String getterName = getter.getName() + "." + getter.getReturnType().getName();
+			String getterName = getter.getName() + "."
+					+ getter.getReturnType().getName();
 			String setterName = generateSetterKeyFromGetter(getterName);
 			String fieldName = generateFieldKeyFromSetter(setterName);
 
@@ -181,12 +186,15 @@ public class GenericDaoUtils {
 			Field field = fieldMap.get(fieldName);
 
 			// 如果没有setter或getter与setter类型不匹配，则跳过
-			if (setter == null || !getter.getReturnType().equals(setter.getParameterTypes()[0])) {
+			if (setter == null
+					|| !getter.getReturnType().equals(
+							setter.getParameterTypes()[0])) {
 				continue;
 			}
 
 			Column column = fetchColumn(field, getter, setter, entityClass);
-			ColumnMapper columnMapper = new ColumnMapper(getter, setter, column, columnStyle);
+			ColumnMapper columnMapper = new ColumnMapper(getter, setter,
+					column, columnStyle);
 			columnMappers.put(columnMapper.getColumn(), columnMapper);
 		}
 
@@ -204,7 +212,8 @@ public class GenericDaoUtils {
 	 * @param entityClass
 	 * @return created by Tianxin on 2015年6月1日 上午11:44:30
 	 */
-	private static Column fetchColumn(Field field, Method getter, Method setter, Class<?> entityClass) {
+	private static Column fetchColumn(Field field, Method getter,
+			Method setter, Class<?> entityClass) {
 
 		// 如果field在当前类中声明，且field中有Column的注解，则返回该Column注解
 		if (field != null && field.getDeclaringClass().equals(entityClass)) {
@@ -241,10 +250,12 @@ public class GenericDaoUtils {
 			Field superField = superClass.getField(field.getName());
 			field = superField == null ? field : superField;
 
-			Method superGetter = superClass.getMethod(getter.getName(), getter.getParameterTypes());
+			Method superGetter = superClass.getMethod(getter.getName(),
+					getter.getParameterTypes());
 			getter = superGetter == null ? getter : superGetter;
 
-			Method superSetter = superClass.getMethod(setter.getName(), setter.getParameterTypes());
+			Method superSetter = superClass.getMethod(setter.getName(),
+					setter.getParameterTypes());
 			setter = superSetter == null ? setter : superSetter;
 		} catch (Exception e) {
 		}
@@ -271,11 +282,11 @@ public class GenericDaoUtils {
 	 * @return created by Tianxin on 2015年6月1日 上午11:25:45
 	 */
 	private static String generateSetterKeyFromGetter(String getterName) {
-		
-		if(getterName.startsWith("is")){
+
+		if (getterName.startsWith("is")) {
 			return "set" + getterName.substring(2);
 		}
-		
+
 		StringBuilder sb = new StringBuilder(getterName);
 		sb.setCharAt(0, 's');
 		return sb.toString();
@@ -293,9 +304,11 @@ public class GenericDaoUtils {
 			return Collections.emptyMap();
 		}
 
-		Map<String, Method> methodMap = new HashMap<String, Method>(methods.size() * 2);
+		Map<String, Method> methodMap = new HashMap<String, Method>(
+				methods.size() * 2);
 		for (Method m : methods) {
-			String name = m.getName() + "." + m.getParameterTypes()[0].getName();
+			String name = m.getName() + "."
+					+ m.getParameterTypes()[0].getName();
 			if (!methodMap.containsKey(name)) {
 				methodMap.put(name, m);
 			}
@@ -315,7 +328,8 @@ public class GenericDaoUtils {
 			return Collections.emptyMap();
 		}
 
-		Map<String, Field> fieldMap = new HashMap<String, Field>(fields.size() * 2);
+		Map<String, Field> fieldMap = new HashMap<String, Field>(
+				fields.size() * 2);
 		for (Field f : fields) {
 			String name = f.getName() + "." + f.getType().getName();
 			if (!fieldMap.containsKey(name)) {
@@ -364,8 +378,9 @@ public class GenericDaoUtils {
 			}
 
 			String name = m.getName();
-			if (returnType.equals(Boolean.class) || returnType.equals(Boolean.TYPE)) {
-				if(isLegalXetterName(name, "is")){
+			if (returnType.equals(Boolean.class)
+					|| returnType.equals(Boolean.TYPE)) {
+				if (isLegalXetterName(name, "is")) {
 					methods.add(m);
 				}
 			} else if (isLegalXetterName(name, "get")) {
@@ -386,10 +401,12 @@ public class GenericDaoUtils {
 	 * 是否是一个合法的getter或setter方法名
 	 * 
 	 * @param methodName
-	 * @param xetterPrefix 可能是get、set、is
+	 * @param xetterPrefix
+	 *            可能是get、set、is
 	 * @return created by Tianxin on 2015年6月1日 上午11:30:31
 	 */
-	private static boolean isLegalXetterName(String methodName, String xetterPrefix) {
+	private static boolean isLegalXetterName(String methodName,
+			String xetterPrefix) {
 		int length = methodName.length();
 		if (length <= 3) {
 			return false;
@@ -508,15 +525,67 @@ public class GenericDaoUtils {
 
 		return fields;
 	}
-	
-	public final static String connect(Object...os){
-		if(os == null || os.length == 0){
+
+	/**
+	 * 字符串连接
+	 * 
+	 * @param os
+	 * @return
+	 */
+	public final static String connect(Object... os) {
+		if (os == null || os.length == 0) {
 			return "";
 		}
 		StringBuilder sb = new StringBuilder(os.length * 5);
-		for(Object o : os){
+		for (Object o : os) {
 			sb.append(o);
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * 提取key的集合
+	 * 
+	 * @param entities
+	 * @return created by Tianxin on 2015年5月28日 下午6:03:43
+	 */
+	public static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> List<KEY> extractKeys(
+			Collection<ENTITY> entities) {
+
+		List<KEY> keys = new ArrayList<KEY>(entities.size());
+		for (ENTITY entity : entities) {
+			keys.add(entity.getId());
+		}
+		return keys;
+	}
+
+	/**
+	 * 去除不合法的entity
+	 * 
+	 * @param entities
+	 * @return created by Tianxin on 2015年5月28日 下午4:29:02
+	 */
+	public final static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> List<ENTITY> trimEntities(
+			Collection<ENTITY> entities) {
+		if (entities == null || entities.size() == 0) {
+			return null;
+		}
+
+		ArrayList<ENTITY> list = new ArrayList<ENTITY>(entities.size());
+		for (ENTITY e : entities) {
+			if (e != null) {
+				list.add(e);
+			}
+		}
+		return list;
+	}
+
+	public final static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> List<ENTITY> toEntities(
+			ENTITY... entities) {
+		List<ENTITY> entityList = new ArrayList<ENTITY>(1);
+		for (ENTITY entity : entities) {
+			entityList.add(entity);
+		}
+		return entityList;
 	}
 }

@@ -32,7 +32,7 @@ public interface BaseDao<KEY extends Serializable, ENTITY extends BaseObject<KEY
 	 * 如果存在ID相同的数据则update，如果不存在则创建
 	 * created by Tianxin on 2015年5月26日 下午9:16:51
 	 */
-	boolean replace(ENTITY entity);
+	int replace(Collection<ENTITY> entity);
 	
 	/**
 	 * 更新一条记录
