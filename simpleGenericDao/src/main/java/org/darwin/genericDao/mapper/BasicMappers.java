@@ -13,12 +13,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.darwin.genericDao.bo.BaseObject;
+import org.darwin.common.utils.GenericDaoUtils;
 import org.springframework.jdbc.core.RowMapper;
 
 /**
@@ -31,13 +30,26 @@ public class BasicMappers {
 	 */
 	private static Map<Class<?>, Map<String, ColumnMapper>> columnMappersMap = new HashMap<Class<?>, Map<String,ColumnMapper>>(256);
 	
+	private static Map<Class<?>, Class<?>> entityKeyClassMap = new HashMap<Class<?>, Class<?>>();
+	
+	/**
+	 * 获取一个实体类的主键类型
+	 * @param entityClass
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午12:16:03
+	 */
+	public static Class<?> getKeyClass(Class<?> entityClass){
+		return entityKeyClassMap.get(entityClass);
+	}
+	
 	/**
 	 * 将一个columnMappers注册到基础映射集中
 	 * @param entityClass
 	 * @param columnMappers
 	 * created by Tianxin on 2015年6月1日 下午2:13:29
 	 */
-	public static void register(Class<?> entityClass, Map<String, ColumnMapper> columnMappers){
+	public static void register(Class<?> keyClass, Class<?> entityClass, Map<String, ColumnMapper> columnMappers){
+		entityKeyClassMap.put(entityClass, keyClass);
 		columnMappersMap.put(entityClass, columnMappers);
 	}
 	
@@ -58,46 +70,11 @@ public class BasicMappers {
 	 * @param sql
 	 * @return created by Tianxin on 2015年5月28日 下午5:48:08
 	 */
-	public static <ENTITY extends BaseObject<?>> RowMapper<ENTITY> getEntityMapper(Class<ENTITY> eClass, String sql) {
+	public static <ENTITY extends Object> RowMapper<ENTITY> getEntityMapper(Class<ENTITY> eClass, String sql) {
 
-		List<String> columns = getColumnsFromSQL(sql);
+		List<String> columns = GenericDaoUtils.getColumnsFromSQL(sql);
 		Map<String, ColumnMapper> columnMappers = getColumnMappers(eClass);
 		return new EntityMapper<ENTITY>(columns, columnMappers, eClass);
-	}
-
-	/**
-	 * @param sql
-	 * @return created by Tianxin on 2015年5月28日 下午5:49:10
-	 */
-	private static List<String> getColumnsFromSQL(String sql) {
-		if (sql == null || sql.length() == 0) {
-			return new ArrayList<String>(0);
-		}
-
-		// 获取字段列表部分
-		sql = sql.trim().replaceAll("\\s+", " ");
-		int start = sql.toLowerCase().indexOf("select ") + "select ".length();
-		int end = sql.toLowerCase().indexOf(" from ");
-		String sColumns = sql.substring(start, end).trim();
-
-		// 解析字段列表部分
-		String[] columns = sColumns.split(",");
-		List<String> columnList = new ArrayList<String>(columns.length);
-		for (String column : columns) {
-			column = column.trim();
-			int index = column.lastIndexOf(' ');
-
-			// 以空格处理别名的
-			if (index > 0) {
-				columnList.add(column.substring(index + 1).trim());
-				continue;
-			}
-
-			// 无别名的
-			columnList.add(column);
-		}
-
-		return columnList;
 	}
 	
 	/**

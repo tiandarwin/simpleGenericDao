@@ -26,6 +26,7 @@ import org.darwin.genericDao.mapper.ColumnMapper;
 import org.darwin.genericDao.mapper.EntityMapper;
 import org.darwin.genericDao.mapper.QueryHandler;
 import org.darwin.genericDao.operate.Matches;
+import org.darwin.genericDao.operate.Orders;
 import org.darwin.genericDao.query.QueryDelete;
 import org.darwin.genericDao.query.QuerySelect;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -236,14 +237,21 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	}
 
 	/**
-	 * created by Tianxin on 2015年5月26日 下午9:34:29
+	 * 如果column的取值match到了value则进行删除
+	 * @param column	字段名
+	 * @param value	匹配值
+	 * @return	删除条数
+	 * created by Tianxin on 2015年6月3日 下午8:33:29
 	 */
 	protected int delete(String column, Object value) {
 		return delete(Matches.one(column, value));
 	}
 
 	/**
-	 * created by Tianxin on 2015年5月26日 下午9:35:15
+	 * 按照匹配条件删除数据
+	 * @param matches	匹配条件，可为null
+	 * @return	删除条数
+	 * created by Tianxin on 2015年6月3日 下午8:34:03
 	 */
 	protected int delete(Matches matches) {
 		QueryDelete query = new QueryDelete(matches, queryHandler.table());
@@ -271,39 +279,74 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	}
 
 	/**
-	 * created by Tianxin on 2015年5月26日 下午9:29:59
+	 * 获取符合条件的第一条记录
+	 * @param column	字段名
+	 * @param value	字段取值
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:34:36
 	 */
 	protected ENTITY findOne(String column, Object value) {
-		List<ENTITY> entities = find(column, value);
-		if (entities == null || entities.size() == 0) {
-			return null;
-		}
-		return entities.get(0);
+		return findOne(Matches.one(column, value));
 	}
 
 	/**
-	 * created by Tianxin on 2015年5月26日 下午9:29:59
+	 * 获取符合条件的数据
+	 * @param column	字段名
+	 * @param value	字段取值
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:43:57
 	 */
 	protected List<ENTITY> find(String column, Object value) {
 		return find(Matches.one(column, value));
 	}
 
+	/**
+	 * 获取所有的数据
+	 */
 	public List<ENTITY> findAll() {
 		return find(Matches.empty());
 	}
 
 	/**
-	 * created by Tianxin on 2015年5月26日 下午9:28:56
+	 * 获取符合匹配条件的数据
+	 * @param matches	匹配条件，可为null
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:44:48
 	 */
 	protected List<ENTITY> find(Matches matches) {
-		return page(matches, 0, 0);
+		return find(matches, null);
+	}
+	
+	/**
+	 * 获取符合匹配条件的数据，并按orders排序
+	 * @param matches	匹配条件，可为null
+	 * @param orders	排序规则，可以为null
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:45:12
+	 */
+	protected List<ENTITY> find(Matches matches, Orders orders) {
+		return page(matches, orders, 0, 0);
 	}
 
 	/**
-	 * created by Tianxin on 2015年5月26日 下午9:29:59
+	 * 获取符合匹配条件的第一条记录
+	 * @param matches	匹配条件，可为null
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:46:04
 	 */
 	protected ENTITY findOne(Matches matches) {
-		List<ENTITY> entities = find(matches);
+		return findOne(matches, null);
+	}
+	
+	/**
+	 * 获取符合匹配条件的按orders排序后的第一调数据
+	 * @param matches	匹配条件，可为null
+	 * @param orders	排序规则，可为null
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:46:29
+	 */
+	protected ENTITY findOne(Matches matches, Orders orders) {
+		List<ENTITY> entities = page(matches, orders, 0, 1);
 		if (entities == null || entities.size() == 0) {
 			return null;
 		}
@@ -311,25 +354,43 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	}
 
 	/**
-	 * created by Tianxin on 2015年5月26日 下午9:28:56
+	 * 分页查询
+	 * @param matches	匹配条件，可为null
+	 * @param orders	匹配条件，可为null
+	 * @param offset	起始位置
+	 * @param limit	获取条数
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:47:09
 	 */
-	protected List<ENTITY> page(Matches matches, int offset, int limit) {
+	protected List<ENTITY> page(Matches matches, Orders orders, int offset, int limit) {
 		List<String> allColumns = queryHandler.allColumns();
-		QuerySelect query = new QuerySelect(allColumns, matches, null, configKeeper.table(), offset, limit);
+		QuerySelect query = new QuerySelect(allColumns, matches, orders, configKeeper.table(), offset, limit);
 		String sql = query.getSQL();
 		Object[] params = query.getParams();
 		return jdbcTemplate.query(sql, params, new EntityMapper<ENTITY>(allColumns, columnMappers, entityClass));
 	}
 
 	/**
-	 * created by Tianxin on 2015年5月26日 下午9:28:56
+	 * 查询某一列
+	 * @param rClass	结果类型
+	 * @param matches	匹配条件，可为null
+	 * @param column	获取哪一列
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:47:59
 	 */
 	protected <R extends Serializable> List<R> findOneColumn(Class<R> rClass, Matches matches, String column) {
 		return pageOneColumn(rClass, matches, column, 0, 0);
 	}
 
 	/**
-	 * created by Tianxin on 2015年5月26日 下午9:28:56
+	 * 分页查询某一列
+	 * @param rClass	结果类型
+	 * @param matches	匹配条件
+	 * @param column	字段名
+	 * @param offset	起始位置
+	 * @param limit	获取条数
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:48:26
 	 */
 	protected <R extends Serializable> List<R> pageOneColumn(Class<R> rClass, Matches matches, String column, int offset, int limit) {
 		List<String> columns = Arrays.asList(column);
@@ -340,35 +401,82 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	}
 
 	/**
-	 * created by Tianxin on 2015年5月26日 下午9:28:56
+	 * 查询简单对象，只获取其中几列
+	 * @param matches	匹配条件，可为null
+	 * @param columns	字段名
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:49:03
 	 */
 	protected List<ENTITY> findSimple(Matches matches, String... columns) {
-		return pageSimple(matches, 0, 0, columns);
+		return findSimple(matches, null, columns);
+	}
+	
+	/**
+	 * 查询简单对象，只获取几列
+	 * @param matches	匹配条件，可为null
+	 * @param orders	排序规则，可为null
+	 * @param columns	字段集合
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:49:49
+	 */
+	protected List<ENTITY> findSimple(Matches matches, Orders orders, String... columns) {
+		return pageSimple(matches, orders, 0, 0, columns);
 	}
 
+	/**
+	 * 根据SQL查询结果
+	 * @param eClass	结果映射到的对象
+	 * @param sql	查询SQL
+	 * @param params	参数
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:50:26
+	 */
 	protected <E extends BaseObject<?>> List<E> findBySQL(Class<E> eClass, String sql, Object... params) {
 		return jdbcTemplate.query(sql, params, BasicMappers.getEntityMapper(eClass, sql));
 	}
 
 	/**
-	 * created by Tianxin on 2015年5月26日 下午9:28:56
+	 * 分页查询简单对象
+	 * @param matches	匹配条件，可为null
+	 * @param orders	排序规则，可为null
+	 * @param offset	起始位置
+	 * @param limit	获取条数
+	 * @param columns	字段集合
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:50:57
 	 */
-	protected List<ENTITY> pageSimple(Matches matches, int offset, int limit, String... columns) {
+	protected List<ENTITY> pageSimple(Matches matches, Orders orders, int offset, int limit, String... columns) {
 		List<String> choozenColumns = Arrays.asList(columns);
-		QuerySelect query = new QuerySelect(choozenColumns, matches, null, configKeeper.table(), offset, limit);
+		QuerySelect query = new QuerySelect(choozenColumns, matches, orders, configKeeper.table(), offset, limit);
 		String sql = query.getSQL();
 		Object[] params = query.getParams();
 		return jdbcTemplate.query(sql, params, new EntityMapper<ENTITY>(choozenColumns, columnMappers, entityClass));
 	}
 
+	/**
+	 * 查询记录条数
+	 */
 	public int countAll() {
 		return count(Matches.empty());
 	}
 
+	/**
+	 * 查询符合条件的记录条数
+	 * @param column	字段名字
+	 * @param value	字段匹配值
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:51:43
+	 */
 	protected int count(String column, Object value) {
 		return count(Matches.one(column, value));
 	}
 
+	/**
+	 * 查询符合条件的结果条数
+	 * @param matches	匹配条件，可为null
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:52:01
+	 */
 	protected int count(Matches matches) {
 		List<String> columns = Arrays.asList("count(1)");
 		QuerySelect query = new QuerySelect(columns, matches, null, configKeeper.table());

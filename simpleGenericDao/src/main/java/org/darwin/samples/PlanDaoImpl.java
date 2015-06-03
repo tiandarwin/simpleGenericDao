@@ -24,7 +24,7 @@ public class PlanDaoImpl extends GenericDao<Integer, Plan> implements PlanDao {
 	}
 
 	public List<Plan> pageByUserId(int userId, int offset, int limit) {
-		return page(Matches.one(UserObject.Columns.userId, userId), offset, limit);
+		return page(Matches.one(UserObject.Columns.userId, userId), null, offset, limit);
 	}
 
 	public List<Plan> pageSimpleByUserId(int userId, int offset, int limit) {

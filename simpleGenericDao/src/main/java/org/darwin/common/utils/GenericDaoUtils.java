@@ -23,7 +23,7 @@ import java.util.Map;
 import org.darwin.genericDao.annotations.Column;
 import org.darwin.genericDao.annotations.Sequence;
 import org.darwin.genericDao.annotations.Table;
-import org.darwin.genericDao.annotations.Table.ColumnStyle;
+import org.darwin.genericDao.annotations.enums.ColumnStyle;
 import org.darwin.genericDao.bo.BaseObject;
 import org.darwin.genericDao.mapper.BasicMappers;
 import org.darwin.genericDao.mapper.ColumnMapper;
@@ -34,14 +34,48 @@ import org.darwin.genericDao.mapper.ColumnMapper;
 public class GenericDaoUtils {
 
 	/**
+	 * @param sql
+	 * @return created by Tianxin on 2015年5月28日 下午5:49:10
+	 */
+	public static List<String> getColumnsFromSQL(String sql) {
+		if (sql == null || sql.length() == 0) {
+			return new ArrayList<String>(0);
+		}
+
+		// 获取字段列表部分
+		sql = sql.trim().replaceAll("\\s+", " ");
+		int start = sql.toLowerCase().indexOf("select ") + "select ".length();
+		int end = sql.toLowerCase().indexOf(" from ");
+		String sColumns = sql.substring(start, end).trim();
+
+		// 解析字段列表部分
+		String[] columns = sColumns.split(",");
+		List<String> columnList = new ArrayList<String>(columns.length);
+		for (String column : columns) {
+			column = column.trim();
+			int index = column.lastIndexOf(' ');
+
+			// 以空格处理别名的
+			if (index > 0) {
+				columnList.add(column.substring(index + 1).trim());
+				continue;
+			}
+
+			// 无别名的
+			columnList.add(column);
+		}
+
+		return columnList;
+	}
+
+	/**
 	 * 获取GenericDao的子类所操作的Entity的class
 	 * 
 	 * @param subGenericDaoClass
 	 * @return created by Tianxin on 2015年5月31日 下午10:51:37
 	 */
 	@SuppressWarnings("unchecked")
-	public static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> Class<ENTITY> getEntityClass(
-			Class<?> subGenericDaoClass) {
+	public static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> Class<ENTITY> getEntityClass(Class<?> subGenericDaoClass) {
 
 		// TODO 这个方法里面有一些漏洞，应该从GenericDao类向下追溯，根据语法规则找到准确的语法指定的泛型，而不是底向上回溯
 
@@ -64,8 +98,7 @@ public class GenericDaoUtils {
 
 				// 如果是BaseObject的子类，则直接返回即可
 				Class<?> typeClass = (Class<?>) type;
-				boolean isBaseObjectClass = BaseObject.class
-						.isAssignableFrom(typeClass);
+				boolean isBaseObjectClass = BaseObject.class.isAssignableFrom(typeClass);
 				if (isBaseObjectClass) {
 					return (Class<ENTITY>) typeClass;
 				}
@@ -83,8 +116,7 @@ public class GenericDaoUtils {
 	 * @return created by Tianxin on 2015年5月31日 下午10:51:37
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static <KEY extends Serializable> Class<KEY> getKeyClass(
-			Class entityClass) {
+	public static <KEY extends Serializable> Class<KEY> getKeyClass(Class entityClass) {
 
 		// TODO 这个方法里面有一些漏洞，应该从GenericDao类向下追溯，根据语法规则找到准确的语法指定的泛型，而不是底向上回溯
 
@@ -107,8 +139,7 @@ public class GenericDaoUtils {
 
 				// 如果是BaseObject的子类，则直接返回即可
 				Class<?> typeClass = (Class<?>) type;
-				boolean isKeyClass = Serializable.class
-						.isAssignableFrom(typeClass);
+				boolean isKeyClass = Serializable.class.isAssignableFrom(typeClass);
 				if (isKeyClass) {
 					return (Class<KEY>) typeClass;
 				}
@@ -161,8 +192,8 @@ public class GenericDaoUtils {
 	 * @param entityClass
 	 * @return created by Tianxin on 2015年6月1日 上午10:26:05
 	 */
-	public static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> Map<String, ColumnMapper> generateColumnMappers(
-			Class<ENTITY> entityClass, ColumnStyle columnStyle) {
+	public static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> Map<String, ColumnMapper> generateColumnMappers(Class<ENTITY> entityClass,
+			ColumnStyle columnStyle) {
 
 		// 获取get方法、set方法、属性的列表
 		List<Field> fields = getAllFields(entityClass);
@@ -174,13 +205,11 @@ public class GenericDaoUtils {
 		Map<String, Method> setterMap = trans2SetterMap(setters);
 
 		// 以getter方法做循环，找到配对的方法和属性信息
-		Map<String, ColumnMapper> columnMappers = new HashMap<String, ColumnMapper>(
-				50);
+		Map<String, ColumnMapper> columnMappers = new HashMap<String, ColumnMapper>(50);
 		for (Method getter : getters) {
 
 			// 推导对一个的setter名字与field名字
-			String getterName = getter.getName() + "."
-					+ getter.getReturnType().getName();
+			String getterName = getter.getName() + "." + getter.getReturnType().getName();
 			String setterName = generateSetterKeyFromGetter(getterName);
 			String fieldName = generateFieldKeyFromSetter(setterName);
 
@@ -189,20 +218,18 @@ public class GenericDaoUtils {
 			Field field = fieldMap.get(fieldName);
 
 			// 如果没有setter或getter与setter类型不匹配，则跳过
-			if (setter == null
-					|| !getter.getReturnType().equals(
-							setter.getParameterTypes()[0])) {
+			if (setter == null || !getter.getReturnType().equals(setter.getParameterTypes()[0])) {
 				continue;
 			}
 
 			Column column = fetchColumn(field, getter, setter, entityClass);
-			ColumnMapper columnMapper = new ColumnMapper(getter, setter,
-					column, columnStyle);
+			ColumnMapper columnMapper = new ColumnMapper(getter, setter, column, columnStyle);
 			columnMappers.put(columnMapper.getColumn(), columnMapper);
 		}
 
 		// 注册到BasicMapper中
-		BasicMappers.register(entityClass, columnMappers);
+		Class<KEY> keyClass = getKeyClass(entityClass);
+		BasicMappers.register(keyClass, entityClass, columnMappers);
 		return columnMappers;
 	}
 
@@ -215,8 +242,7 @@ public class GenericDaoUtils {
 	 * @param entityClass
 	 * @return created by Tianxin on 2015年6月1日 上午11:44:30
 	 */
-	private static Column fetchColumn(Field field, Method getter,
-			Method setter, Class<?> entityClass) {
+	static Column fetchColumn(Field field, Method getter, Method setter, Class<?> entityClass) {
 
 		// 如果field在当前类中声明，且field中有Column的注解，则返回该Column注解
 		if (field != null && field.getDeclaringClass().equals(entityClass)) {
@@ -253,12 +279,10 @@ public class GenericDaoUtils {
 			Field superField = superClass.getField(field.getName());
 			field = superField == null ? field : superField;
 
-			Method superGetter = superClass.getMethod(getter.getName(),
-					getter.getParameterTypes());
+			Method superGetter = superClass.getMethod(getter.getName(), getter.getParameterTypes());
 			getter = superGetter == null ? getter : superGetter;
 
-			Method superSetter = superClass.getMethod(setter.getName(),
-					setter.getParameterTypes());
+			Method superSetter = superClass.getMethod(setter.getName(), setter.getParameterTypes());
 			setter = superSetter == null ? setter : superSetter;
 		} catch (Exception e) {
 		}
@@ -272,7 +296,7 @@ public class GenericDaoUtils {
 	 * @param setterName
 	 * @return created by Tianxin on 2015年6月1日 上午11:26:30
 	 */
-	private static String generateFieldKeyFromSetter(String setterName) {
+	static String generateFieldKeyFromSetter(String setterName) {
 		StringBuilder sb = new StringBuilder(setterName.substring(3));
 		sb.setCharAt(0, (char) (sb.charAt(0) + 32));
 		return sb.toString();
@@ -284,7 +308,7 @@ public class GenericDaoUtils {
 	 * @param getterName
 	 * @return created by Tianxin on 2015年6月1日 上午11:25:45
 	 */
-	private static String generateSetterKeyFromGetter(String getterName) {
+	static String generateSetterKeyFromGetter(String getterName) {
 
 		if (getterName.startsWith("is")) {
 			return "set" + getterName.substring(2);
@@ -301,17 +325,15 @@ public class GenericDaoUtils {
 	 * @param methods
 	 * @return created by Tianxin on 2015年6月1日 上午11:13:56
 	 */
-	private static Map<String, Method> trans2SetterMap(List<Method> methods) {
+	static Map<String, Method> trans2SetterMap(List<Method> methods) {
 
 		if (methods == null || methods.size() == 0) {
 			return Collections.emptyMap();
 		}
 
-		Map<String, Method> methodMap = new HashMap<String, Method>(
-				methods.size() * 2);
+		Map<String, Method> methodMap = new HashMap<String, Method>(methods.size() * 2);
 		for (Method m : methods) {
-			String name = m.getName() + "."
-					+ m.getParameterTypes()[0].getName();
+			String name = m.getName() + "." + m.getParameterTypes()[0].getName();
 			if (!methodMap.containsKey(name)) {
 				methodMap.put(name, m);
 			}
@@ -325,14 +347,13 @@ public class GenericDaoUtils {
 	 * @param fields
 	 * @return created by Tianxin on 2015年6月1日 上午11:13:56
 	 */
-	private static Map<String, Field> trans2FieldMap(List<Field> fields) {
+	static Map<String, Field> trans2FieldMap(List<Field> fields) {
 
 		if (fields == null || fields.size() == 0) {
 			return Collections.emptyMap();
 		}
 
-		Map<String, Field> fieldMap = new HashMap<String, Field>(
-				fields.size() * 2);
+		Map<String, Field> fieldMap = new HashMap<String, Field>(fields.size() * 2);
 		for (Field f : fields) {
 			String name = f.getName() + "." + f.getType().getName();
 			if (!fieldMap.containsKey(name)) {
@@ -348,7 +369,7 @@ public class GenericDaoUtils {
 	 * @param clazz
 	 * @return created by Tianxin on 2015年6月1日 上午10:27:22
 	 */
-	private static List<Method> getAllGetters(Class<?> clazz) {
+	static List<Method> getAllGetters(Class<?> clazz) {
 
 		if (clazz == null) {
 			return new ArrayList<Method>(0);
@@ -381,8 +402,7 @@ public class GenericDaoUtils {
 			}
 
 			String name = m.getName();
-			if (returnType.equals(Boolean.class)
-					|| returnType.equals(Boolean.TYPE)) {
+			if (returnType.equals(Boolean.class) || returnType.equals(Boolean.TYPE)) {
 				if (isLegalXetterName(name, "is")) {
 					methods.add(m);
 				}
@@ -408,8 +428,7 @@ public class GenericDaoUtils {
 	 *            可能是get、set、is
 	 * @return created by Tianxin on 2015年6月1日 上午11:30:31
 	 */
-	private static boolean isLegalXetterName(String methodName,
-			String xetterPrefix) {
+	private static boolean isLegalXetterName(String methodName, String xetterPrefix) {
 		int length = methodName.length();
 		if (length <= 3) {
 			return false;
@@ -428,7 +447,7 @@ public class GenericDaoUtils {
 	 * @param clazz
 	 * @return created by Tianxin on 2015年6月1日 上午10:27:36
 	 */
-	private static List<Method> getAllSetters(Class<?> clazz) {
+	static List<Method> getAllSetters(Class<?> clazz) {
 
 		if (clazz == null) {
 			return new ArrayList<Method>(0);
@@ -482,13 +501,13 @@ public class GenericDaoUtils {
 	 * @return created by Tianxin on 2015年6月1日 上午10:53:56
 	 */
 	private static boolean isTypeFromJdk(Class<?> type) {
-		if(type.isPrimitive()){
-		}else if(type.getPackage().getName().startsWith("java.lang")){
-		}else if(Date.class.isAssignableFrom(type)){
-		}else if(BigDecimal.class.isAssignableFrom(type)){
-		}else if(URL.class.isAssignableFrom(type)){
-		//以上几种都不是，则证明非原生类型
-		}else {
+		if (type.isPrimitive()) {
+		} else if (type.getPackage().getName().startsWith("java")) {
+		} else if (Date.class.isAssignableFrom(type)) {
+		} else if (BigDecimal.class.isAssignableFrom(type)) {
+		} else if (URL.class.isAssignableFrom(type)) {
+			// 以上几种都不是，则证明非原生类型
+		} else {
 			return false;
 		}
 		return true;
@@ -514,7 +533,7 @@ public class GenericDaoUtils {
 	 * @param clazz
 	 * @return created by Tianxin on 2015年6月1日 上午10:27:52
 	 */
-	private static List<Field> getAllFields(Class<?> clazz) {
+	static List<Field> getAllFields(Class<?> clazz) {
 		if (clazz == null) {
 			return new ArrayList<Field>(0);
 		}
@@ -560,8 +579,7 @@ public class GenericDaoUtils {
 	 * @param entities
 	 * @return created by Tianxin on 2015年5月28日 下午6:03:43
 	 */
-	public static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> List<KEY> extractKeys(
-			Collection<ENTITY> entities) {
+	public static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> List<KEY> extractKeys(Collection<ENTITY> entities) {
 
 		List<KEY> keys = new ArrayList<KEY>(entities.size());
 		for (ENTITY entity : entities) {
@@ -576,8 +594,7 @@ public class GenericDaoUtils {
 	 * @param entities
 	 * @return created by Tianxin on 2015年5月28日 下午4:29:02
 	 */
-	public final static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> List<ENTITY> trimEntities(
-			Collection<ENTITY> entities) {
+	public final static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> List<ENTITY> trimEntities(Collection<ENTITY> entities) {
 		if (entities == null || entities.size() == 0) {
 			return null;
 		}
@@ -591,8 +608,7 @@ public class GenericDaoUtils {
 		return list;
 	}
 
-	public final static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> List<ENTITY> toEntities(
-			ENTITY... entities) {
+	public final static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> List<ENTITY> toEntities(ENTITY... entities) {
 		List<ENTITY> entityList = new ArrayList<ENTITY>(1);
 		for (ENTITY entity : entities) {
 			entityList.add(entity);

@@ -18,13 +18,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.darwin.genericDao.bo.BaseObject;
 import org.springframework.jdbc.core.RowMapper;
 
 /**
  * created by Tianxin on 2015年5月28日 下午5:26:33
  */
-public class EntityMapper<ENTITY extends BaseObject<?>> implements RowMapper<ENTITY> {
+public class EntityMapper<ENTITY extends Object> implements RowMapper<ENTITY> {
 
 	// 无参构造函数私有化
 	private EntityMapper() {
@@ -68,7 +67,8 @@ public class EntityMapper<ENTITY extends BaseObject<?>> implements RowMapper<ENT
 				}
 
 				Method setter = mapper.getSetter();
-				Object value = getObjectForType(rs, column, setter.getParameterTypes()[0]);
+				Class<?> paramClass = setter.getName().equals("setId") ? BasicMappers.getKeyClass(entityClass) : setter.getParameterTypes()[0];
+				Object value = getObjectForType(rs, column, paramClass);
 				setter.invoke(entity, value);
 			}
 

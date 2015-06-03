@@ -10,6 +10,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.darwin.genericDao.annotations.enums.ColumnStyle;
+
 
 /**
  * 标记一个bo对应着数据库中哪个table的注解
@@ -61,52 +63,4 @@ public @interface Table {
      * @return 映射规则 @see ColumnStyle
      */
     ColumnStyle columnStyle() default ColumnStyle.JAVA_TO_MYSQL;
-
-    /**
-     * 格式转换，对象属性到数据库列的映射规则
-     * 
-     * create by Tianxin on 2014-11-30 下午4:20:28
-     */
-    public static enum ColumnStyle {
-
-        /**
-         * 转变为小写，即userId到数据库中映射为userid
-         */
-        LOWER_CASE {
-            @Override
-            public String convert(String field) {
-                return field.toLowerCase();
-            }
-        },
-        
-        /**
-         * 驼峰转为mysql规范，即userId到数据库中映射为user_id
-         */
-        JAVA_TO_MYSQL {
-            @Override
-            public String convert(String field) {
-            	StringBuilder sb = new StringBuilder(field.length() * 2);
-            	for(int i = 0 ; i < field.length(); i ++){
-            		char c = field.charAt(i);
-            		if(c >= 'A' && c <= 'Z'){
-            			sb.append('_').append((char)(c + 32));
-            		} else {
-						sb.append(c);
-					}
-            	}
-                return sb.toString();
-            }
-        };
-
-        /**
-         * 将<code>field</code>格式进行转换
-         * 
-         * @param field JAVA对象属性
-         * @return 数据库表的列
-         */
-        public abstract String convert(String field);
-
-    }
-    
-
 }

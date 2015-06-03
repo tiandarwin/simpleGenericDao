@@ -7,7 +7,7 @@ package org.darwin.genericDao.mapper;
 import java.lang.reflect.Method;
 
 import org.darwin.genericDao.annotations.Column;
-import org.darwin.genericDao.annotations.Table.ColumnStyle;
+import org.darwin.genericDao.annotations.enums.ColumnStyle;
 
 /**
  * 数据表中某一列的映射规则
@@ -15,7 +15,7 @@ import org.darwin.genericDao.annotations.Table.ColumnStyle;
  */
 public class ColumnMapper {
 	
-	private ColumnMapper() {
+	public ColumnMapper() {
 	}
 
 	/**
