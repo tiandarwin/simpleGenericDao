@@ -26,8 +26,10 @@ import org.darwin.genericDao.mapper.ColumnMapper;
 import org.darwin.genericDao.mapper.EntityMapper;
 import org.darwin.genericDao.mapper.QueryHandler;
 import org.darwin.genericDao.operate.Matches;
+import org.darwin.genericDao.operate.Modifies;
 import org.darwin.genericDao.operate.Orders;
 import org.darwin.genericDao.query.QueryDelete;
+import org.darwin.genericDao.query.QueryModify;
 import org.darwin.genericDao.query.QuerySelect;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -63,6 +65,23 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	private AnnotationConfigKeeper configKeeper;
 	private QueryHandler<KEY, ENTITY> queryHandler;
 	private Map<String, ColumnMapper> columnMappers;
+
+	/**
+	 * 该方法会对ENTITY逐条插入，每插入一条时会获取一下数据库中生成的key
+	 * @param entities
+	 * @return
+	 */
+	public int createAndFetchKey(Collection<ENTITY> entities) {
+		if (entities == null || entities.size() == 0) {
+			return 0;
+		}
+		
+		int createdCount = 0;
+		for(ENTITY entity :entities){
+			createdCount += create(entity) ? 1 : 0;
+		}
+		return createdCount;
+	}
 
 	@SuppressWarnings("unchecked")
 	public boolean create(ENTITY entity) {
@@ -123,23 +142,6 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 		return jdbcTemplate.update(sql, params);
 	}
 	
-	/**
-	 * 该方法会对ENTITY逐条插入，每插入一条时会获取一下数据库中生成的key
-	 * @param entities
-	 * @return
-	 */
-	public int createAndFetchKey(Collection<ENTITY> entities) {
-		if (entities == null || entities.size() == 0) {
-			return 0;
-		}
-		
-		int createdCount = 0;
-		for(ENTITY entity :entities){
-			createdCount += create(entity) ? 1 : 0;
-		}
-		return createdCount;
-	}
-
 	public int replace(Collection<ENTITY> entities) {
 		if (entities == null) {
 			return 0;
@@ -153,48 +155,6 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 		sql = sql.replaceFirst("insert", "replace");
 		
 		return jdbcTemplate.update(sql, params);
-	}
-
-	public boolean update(ENTITY entity) {
-		if (entity == null) {
-			return false;
-		}
-		String sql = queryHandler.generateUpdateSQL(entity);
-		Object[] params = queryHandler.generateUpdateParams(entity);
-
-		return jdbcTemplate.update(sql, params) >= 1;
-	}
-
-	public int update(Collection<ENTITY> entities) {
-
-		// 如果为空或这个集合都是空对象，则不更新
-		final List<ENTITY> list = GenericDaoUtils.trimEntities(entities);
-		if (list == null || list.size() == 0) {
-			return 0;
-		}
-
-		String sql = queryHandler.generateUpdateSQL(list.get(0));
-		int[] results = jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
-
-			public void setValues(PreparedStatement ps, int index) throws SQLException {
-				Object[] params = queryHandler.generateUpdateParams(list.get(index));
-				int i = 1;
-				for (Object param : params) {
-					ps.setObject(i++, param);
-				}
-			}
-
-			public int getBatchSize() {
-				return list.size();
-			}
-		});
-		
-		//计算影响的数据条数
-		int updatedCount = 0;
-		for (int i : results) {
-			updatedCount += i;
-		}
-		return updatedCount;
 	}
 
 	public boolean delete(KEY id) {
@@ -260,6 +220,61 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 		return jdbcTemplate.update(sql, params);
 	}
 
+	public boolean update(ENTITY entity) {
+		if (entity == null) {
+			return false;
+		}
+		String sql = queryHandler.generateUpdateSQL(entity);
+		Object[] params = queryHandler.generateUpdateParams(entity);
+	
+		return jdbcTemplate.update(sql, params) >= 1;
+	}
+
+	public int update(Collection<ENTITY> entities) {
+	
+		// 如果为空或这个集合都是空对象，则不更新
+		final List<ENTITY> list = GenericDaoUtils.trimEntities(entities);
+		if (list == null || list.size() == 0) {
+			return 0;
+		}
+	
+		String sql = queryHandler.generateUpdateSQL(list.get(0));
+		int[] results = jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+	
+			public void setValues(PreparedStatement ps, int index) throws SQLException {
+				Object[] params = queryHandler.generateUpdateParams(list.get(index));
+				int i = 1;
+				for (Object param : params) {
+					ps.setObject(i++, param);
+				}
+			}
+	
+			public int getBatchSize() {
+				return list.size();
+			}
+		});
+		
+		//计算影响的数据条数
+		int updatedCount = 0;
+		for (int i : results) {
+			updatedCount += i;
+		}
+		return updatedCount;
+	}
+	
+	/**
+	 * 按照匹配条件进行更新
+	 * @param modifies	数据修改定义	
+	 * @param matches	匹配条件
+	 * @return
+	 */
+	protected int update(Modifies modifies, Matches matches){
+		QueryModify modify = new QueryModify(modifies, matches, configKeeper.table());
+		String sql = modify.getSQL();
+		Object[] args = modify.getParams();
+		return jdbcTemplate.update(sql, args);
+	}
+
 	public ENTITY get(KEY id) {
 		if (id == null) {
 			return null;
@@ -276,6 +291,13 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 			return null;
 		}
 		return find(configKeeper.keyColumn(), ids);
+	}
+
+	/**
+	 * 获取所有的数据
+	 */
+	public List<ENTITY> findAll() {
+		return find(Matches.empty());
 	}
 
 	/**
@@ -298,13 +320,6 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	 */
 	protected List<ENTITY> find(String column, Object value) {
 		return find(Matches.one(column, value));
-	}
-
-	/**
-	 * 获取所有的数据
-	 */
-	public List<ENTITY> findAll() {
-		return find(Matches.empty());
 	}
 
 	/**
@@ -364,10 +379,48 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	 */
 	protected List<ENTITY> page(Matches matches, Orders orders, int offset, int limit) {
 		List<String> allColumns = queryHandler.allColumns();
-		QuerySelect query = new QuerySelect(allColumns, matches, orders, configKeeper.table(), offset, limit);
+		return pageColumns(matches, orders, offset, limit, allColumns.toArray(new String[allColumns.size()]));
+	}
+
+	/**
+	 * 查询简单对象，只获取其中几列
+	 * @param matches	匹配条件，可为null
+	 * @param columns	字段名
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:49:03
+	 */
+	protected List<ENTITY> findSimple(Matches matches, String... columns) {
+		return findSimple(matches, null, columns);
+	}
+
+	/**
+	 * 查询简单对象，只获取几列
+	 * @param matches	匹配条件，可为null
+	 * @param orders	排序规则，可为null
+	 * @param columns	字段集合
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:49:49
+	 */
+	protected List<ENTITY> findSimple(Matches matches, Orders orders, String... columns) {
+		return pageColumns(matches, orders, 0, 0, columns);
+	}
+
+	/**
+	 * 分页查询简单对象
+	 * @param matches	匹配条件，可为null
+	 * @param orders	排序规则，可为null
+	 * @param offset	起始位置
+	 * @param limit	获取条数
+	 * @param columns	字段集合
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:50:57
+	 */
+	protected List<ENTITY> pageColumns(Matches matches, Orders orders, int offset, int limit, String... columns) {
+		List<String> choozenColumns = Arrays.asList(columns);
+		QuerySelect query = new QuerySelect(choozenColumns, matches, orders, configKeeper.table(), offset, limit);
 		String sql = query.getSQL();
 		Object[] params = query.getParams();
-		return jdbcTemplate.query(sql, params, new EntityMapper<ENTITY>(allColumns, columnMappers, entityClass));
+		return jdbcTemplate.query(sql, params, new EntityMapper<ENTITY>(choozenColumns, columnMappers, entityClass));
 	}
 
 	/**
@@ -401,29 +454,6 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	}
 
 	/**
-	 * 查询简单对象，只获取其中几列
-	 * @param matches	匹配条件，可为null
-	 * @param columns	字段名
-	 * @return
-	 * created by Tianxin on 2015年6月3日 下午8:49:03
-	 */
-	protected List<ENTITY> findSimple(Matches matches, String... columns) {
-		return findSimple(matches, null, columns);
-	}
-	
-	/**
-	 * 查询简单对象，只获取几列
-	 * @param matches	匹配条件，可为null
-	 * @param orders	排序规则，可为null
-	 * @param columns	字段集合
-	 * @return
-	 * created by Tianxin on 2015年6月3日 下午8:49:49
-	 */
-	protected List<ENTITY> findSimple(Matches matches, Orders orders, String... columns) {
-		return pageSimple(matches, orders, 0, 0, columns);
-	}
-
-	/**
 	 * 根据SQL查询结果
 	 * @param eClass	结果映射到的对象
 	 * @param sql	查询SQL
@@ -433,24 +463,6 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	 */
 	protected <E extends BaseObject<?>> List<E> findBySQL(Class<E> eClass, String sql, Object... params) {
 		return jdbcTemplate.query(sql, params, BasicMappers.getEntityMapper(eClass, sql));
-	}
-
-	/**
-	 * 分页查询简单对象
-	 * @param matches	匹配条件，可为null
-	 * @param orders	排序规则，可为null
-	 * @param offset	起始位置
-	 * @param limit	获取条数
-	 * @param columns	字段集合
-	 * @return
-	 * created by Tianxin on 2015年6月3日 下午8:50:57
-	 */
-	protected List<ENTITY> pageSimple(Matches matches, Orders orders, int offset, int limit, String... columns) {
-		List<String> choozenColumns = Arrays.asList(columns);
-		QuerySelect query = new QuerySelect(choozenColumns, matches, orders, configKeeper.table(), offset, limit);
-		String sql = query.getSQL();
-		Object[] params = query.getParams();
-		return jdbcTemplate.query(sql, params, new EntityMapper<ENTITY>(choozenColumns, columnMappers, entityClass));
 	}
 
 	/**

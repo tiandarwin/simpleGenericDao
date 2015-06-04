@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.darwin.common.utils.StatGenericDaoUtils;
 import org.darwin.genericDao.annotations.stat.StatTable;
+import org.darwin.genericDao.bo.BaseObject;
 import org.darwin.genericDao.bo.BaseStatObject;
 import org.darwin.genericDao.mapper.BasicMappers;
 import org.darwin.genericDao.mapper.EntityMapper;
@@ -20,11 +21,11 @@ import org.darwin.genericDao.mapper.stat.StatAnnotationKeeper;
 import org.darwin.genericDao.mapper.stat.StatColumnMapper;
 import org.darwin.genericDao.operate.Groups;
 import org.darwin.genericDao.operate.Matches;
+import org.darwin.genericDao.operate.Orders;
 import org.darwin.genericDao.param.SQLParams;
 import org.darwin.genericDao.query.QuerySelect;
 import org.darwin.genericDao.query.QueryStat;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
 /**
  * 统计表的默认DAO实现
@@ -89,24 +90,15 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 	}
 
 	/**
-	 * 获取所有的数据
-	 * @return
-	 * created by Tianxin on 2015年6月3日 下午8:15:38
-	 */
-	public List<ENTITY> findAll(){
-		return find(Matches.empty());
-	}
-	
-	/**
 	 * 获取数据，如果需要按时间聚合，则按其他字段groupBy，把不同时间的汇总到一起
 	 * @param aggregationByDate
 	 * @return
 	 * created by Tianxin on 2015年6月3日 下午8:15:49
 	 */
-	public List<ENTITY> findAll(boolean aggregationByDate) {
+	public List<ENTITY> statAll(boolean aggregationByDate) {
 		Groups groups = aggregationByDate ? generateAggergationByDateGroups() : Groups.init();
 		QueryStat query = new QueryStat(sumColumns, avgColumns, keyColumns, null, null, groups, configKeeper.table());
-		return findByQuery(query);
+		return statByQuery(query);
 	}
 
 	/**
@@ -116,27 +108,14 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 	 * created by Tianxin on 2015年6月3日 下午4:06:19
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected List<ENTITY> findByQuery(QueryStat query) {
+	protected List<ENTITY> statByQuery(QueryStat query) {
 		String sql = query.getSQL();
 		Object[] params = query.getParams();
 		List<String> columns = query.getColumns();
 		System.out.println(sql);
 		return jdbcTemplate.query(sql, params, new EntityMapper(columns, columnMappers, entityClass));
 	}
-	
-	/**
-	 * 根据SQL进行查询，返回结果
-	 * @param eClass
-	 * @param sql
-	 * @param args
-	 * @return
-	 * created by Tianxin on 2015年6月3日 下午8:16:20
-	 */
-	protected <E extends BaseStatObject> List<E> findBySQL(Class<E> eClass, String sql, Object...args){
-		RowMapper<E> mapper = BasicMappers.getEntityMapper(eClass, sql);
-		return jdbcTemplate.query(sql, args, mapper);
-	}
-	
+
 	/**
 	 * 查询某个时间范围的数据
 	 * @param startDate
@@ -145,13 +124,13 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 	 * @return
 	 * created by Tianxin on 2015年6月3日 下午8:16:37
 	 */
-	public List<ENTITY> findByRange(int startDate, int endDate, boolean aggregationByDate) {
+	public List<ENTITY> statByRange(int startDate, int endDate, boolean aggregationByDate) {
 		Matches matches = Matches.one(dateColumn, SQLParams.between(startDate, endDate));
 		Groups groups = aggregationByDate ? generateAggergationByDateGroups() : Groups.init();
 		QueryStat query = new QueryStat(sumColumns, avgColumns, keyColumns, matches, null, groups, configKeeper.table());
-		return findByQuery(query);
+		return statByQuery(query);
 	}
-	
+
 	/**
 	 * 当按时间聚合时，groupBy的字段为除去date字段的其他key字段
 	 * @return
@@ -166,7 +145,7 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 		}
 		return groups;
 	}
-	
+
 	/**
 	 * 计算DB中的数据总数
 	 * @return
@@ -200,41 +179,78 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 		Object[] params = query.getParams();
 		return jdbcTemplate.queryForInt(sql, params);
 	}
+
+	/**
+	 * 获取所有的数据
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:15:38
+	 */
+	public List<ENTITY> findAll(){
+		return find(Matches.empty());
+	}
 	
 	/**
-	 * 根据一个match来查找一个列表
-	 * @param matches
+	 * 获取符合条件的第一条记录
+	 * @param column	字段名
+	 * @param value	字段取值
 	 * @return
-	 * created by Tianxin on 2015年6月3日 下午8:22:19
+	 * created by Tianxin on 2015年6月3日 下午8:34:36
+	 */
+	protected ENTITY findOne(String column, Object value) {
+		return findOne(Matches.one(column, value));
+	}
+
+	/**
+	 * 获取符合条件的数据
+	 * @param column	字段名
+	 * @param value	字段取值
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:43:57
+	 */
+	protected List<ENTITY> find(String column, Object value) {
+		return find(Matches.one(column, value));
+	}
+
+	/**
+	 * 获取符合匹配条件的数据
+	 * @param matches	匹配条件，可为null
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:44:48
 	 */
 	protected List<ENTITY> find(Matches matches) {
-		return page(matches, 0, 0);
+		return find(matches, null);
 	}
-
+	
 	/**
-	 * 根据一个match来分页查找
-	 * @param matches	匹配条件
-	 * @param offset	偏移量
-	 * @param rows	记录条数
+	 * 获取符合匹配条件的数据，并按orders排序
+	 * @param matches	匹配条件，可为null
+	 * @param orders	排序规则，可以为null
 	 * @return
-	 * created by Tianxin on 2015年6月3日 下午8:21:55
+	 * created by Tianxin on 2015年6月3日 下午8:45:12
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected List<ENTITY> page(Matches matches, int offset, int rows) {
-		QuerySelect query = new QuerySelect(allColumns, matches, null, configKeeper.table(), offset, rows);
-		String sql = query.getSQL();
-		Object[] params = query.getParams();
-		return jdbcTemplate.query(sql, params, new EntityMapper(allColumns, columnMappers, entityClass));
+	protected List<ENTITY> find(Matches matches, Orders orders) {
+		return page(matches, orders, 0, 0);
 	}
 
 	/**
-	 * 按条件取一条记录
-	 * @param matches
+	 * 获取符合匹配条件的第一条记录
+	 * @param matches	匹配条件，可为null
 	 * @return
-	 * created by Tianxin on 2015年6月3日 下午8:18:31
+	 * created by Tianxin on 2015年6月3日 下午8:46:04
 	 */
 	protected ENTITY findOne(Matches matches) {
-		List<ENTITY> entities = find(matches);
+		return findOne(matches, null);
+	}
+	
+	/**
+	 * 获取符合匹配条件的按orders排序后的第一调数据
+	 * @param matches	匹配条件，可为null
+	 * @param orders	排序规则，可为null
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:46:29
+	 */
+	protected ENTITY findOne(Matches matches, Orders orders) {
+		List<ENTITY> entities = page(matches, orders, 0, 1);
 		if (entities == null || entities.size() == 0) {
 			return null;
 		}
@@ -242,62 +258,112 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 	}
 
 	/**
-	 * 按条件取某一列，将其作为一个list
-	 * @param rClass	结果装载为的类型
-	 * @param matches	匹配条件
-	 * @param column	列名
+	 * 分页查询
+	 * @param matches	匹配条件，可为null
+	 * @param orders	匹配条件，可为null
+	 * @param offset	起始位置
+	 * @param limit	获取条数
 	 * @return
-	 * created by Tianxin on 2015年6月3日 下午8:18:45
+	 * created by Tianxin on 2015年6月3日 下午8:47:09
+	 */
+	protected List<ENTITY> page(Matches matches, Orders orders, int offset, int limit) {
+		return pageColumns(matches, orders, offset, limit, allColumns.toArray(new String[allColumns.size()]));
+	}
+
+	/**
+	 * 查询简单对象，只获取其中几列
+	 * @param matches	匹配条件，可为null
+	 * @param columns	字段名
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:49:03
+	 */
+	protected List<ENTITY> findSimple(Matches matches, String... columns) {
+		return findSimple(matches, null, columns);
+	}
+
+	/**
+	 * 查询简单对象，只获取几列
+	 * @param matches	匹配条件，可为null
+	 * @param orders	排序规则，可为null
+	 * @param columns	字段集合
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:49:49
+	 */
+	protected List<ENTITY> findSimple(Matches matches, Orders orders, String... columns) {
+		return pageColumns(matches, orders, 0, 0, columns);
+	}
+
+	/**
+	 * 分页查询简单对象
+	 * @param matches	匹配条件，可为null
+	 * @param orders	排序规则，可为null
+	 * @param offset	起始位置
+	 * @param limit	获取条数
+	 * @param columns	字段集合
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:50:57
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	protected List<ENTITY> pageColumns(Matches matches, Orders orders, int offset, int limit, String... columns) {
+		List<String> choozenColumns = Arrays.asList(columns);
+		QuerySelect query = new QuerySelect(choozenColumns, matches, orders, configKeeper.table(), offset, limit);
+		String sql = query.getSQL();
+		Object[] params = query.getParams();
+		return jdbcTemplate.query(sql, params, new EntityMapper(choozenColumns, columnMappers, entityClass));
+	}
+
+	/**
+	 * 查询某一列
+	 * @param rClass	结果类型
+	 * @param matches	匹配条件，可为null
+	 * @param column	获取哪一列
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:47:59
 	 */
 	protected <R extends Serializable> List<R> findOneColumn(Class<R> rClass, Matches matches, String column) {
 		return pageOneColumn(rClass, matches, column, 0, 0);
 	}
 
 	/**
-	 * 按条件，分页查询某一列
-	 * @param rClass	结果装载的类型
+	 * 分页查询某一列
+	 * @param rClass	结果类型
 	 * @param matches	匹配条件
-	 * @param column	列名
-	 * @param offset	偏移量
-	 * @param rows	记录条数
+	 * @param column	字段名
+	 * @param offset	起始位置
+	 * @param limit	获取条数
 	 * @return
-	 * created by Tianxin on 2015年6月3日 下午8:19:25
+	 * created by Tianxin on 2015年6月3日 下午8:48:26
 	 */
-	protected <R extends Serializable> List<R> pageOneColumn(Class<R> rClass, Matches matches, String column, int offset, int rows) {
+	protected <R extends Serializable> List<R> pageOneColumn(Class<R> rClass, Matches matches, String column, int offset, int limit) {
 		List<String> columns = Arrays.asList(column);
-		QuerySelect query = new QuerySelect(columns, matches, null, configKeeper.table(), offset, rows);
+		QuerySelect query = new QuerySelect(columns, matches, null, configKeeper.table(), offset, limit);
 		String sql = query.getSQL();
 		Object[] params = query.getParams();
 		return jdbcTemplate.query(sql, params, BasicMappers.getMapper(rClass));
 	}
 
 	/**
-	 * 查询简单对象
-	 * @param matches	匹配条件
-	 * @param columns	获取的列集合
+	 * 根据SQL查询结果
+	 * @param eClass	结果映射到的对象
+	 * @param sql	查询SQL
+	 * @param params	参数
 	 * @return
-	 * created by Tianxin on 2015年6月3日 下午8:20:11
+	 * created by Tianxin on 2015年6月3日 下午8:50:26
 	 */
-	protected List<ENTITY> findSimple(Matches matches, String... columns) {
-		return pageSimple(matches, 0, 0, columns);
+	protected <E extends BaseObject<?>> List<E> findBySQL(Class<E> eClass, String sql, Object... params) {
+		return jdbcTemplate.query(sql, params, BasicMappers.getEntityMapper(eClass, sql));
 	}
 
-	/**
-	 * 分页查询一些简单对象
-	 * @param matches	匹配条件
-	 * @param offset	偏移量
-	 * @param rows	记录条数
-	 * @param columns	列名
-	 * @return
-	 * created by Tianxin on 2015年6月3日 下午8:20:56
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected List<ENTITY> pageSimple(Matches matches, int offset, int rows, String... columns) {
-		List<String> choozenColumns = Arrays.asList(columns);
-		QuerySelect query = new QuerySelect(choozenColumns, matches, null, configKeeper.table(), offset, rows);
-		String sql = query.getSQL();
-		Object[] params = query.getParams();
-		return jdbcTemplate.query(sql, params, new EntityMapper(choozenColumns, columnMappers, entityClass));
+	protected List<Object> toList(Object... os) {
+		if (os == null || os.length == 0) {
+			return new ArrayList<Object>(0);
+		}
+
+		List<Object> list = new ArrayList<Object>(os.length);
+		for (Object o : os) {
+			list.add(o);
+		}
+		return list;
 	}
 
 

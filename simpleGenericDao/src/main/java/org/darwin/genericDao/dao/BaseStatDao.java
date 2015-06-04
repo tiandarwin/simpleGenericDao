@@ -20,7 +20,7 @@ public interface BaseStatDao<ENTITY extends BaseStatObject> {
 	 * @return
 	 * created by Tianxin on 2015年6月3日 下午3:59:32
 	 */
-	List<ENTITY> findAll(boolean aggregationByDate);
+	List<ENTITY> statAll(boolean aggregationByDate);
 	
 	/**
 	 * 查询某一个时间范围的接口时间范围包括两端的时间点
@@ -30,5 +30,5 @@ public interface BaseStatDao<ENTITY extends BaseStatObject> {
 	 * @return
 	 * created by Tianxin on 2015年6月3日 下午3:59:40
 	 */
-	List<ENTITY> findByRange(int startDate, int endDate, boolean aggregationByDate);
+	List<ENTITY> statByRange(int startDate, int endDate, boolean aggregationByDate);
 }

@@ -13,6 +13,6 @@ public class XDailyRegionStatDaoImpl extends GenericStatDao<XDailyRegionStat> im
 
 	
 	public static void main(String[] args) {
-		new XDailyRegionStatDaoImpl().findByRange(20150501, 20150505, true);
+		new XDailyRegionStatDaoImpl().statByRange(20150501, 20150505, true);
 	}
 }
