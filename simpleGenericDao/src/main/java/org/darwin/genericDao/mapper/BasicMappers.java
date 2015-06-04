@@ -85,6 +85,8 @@ public class BasicMappers {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <R> RowMapper<R> getMapper(Class<R> rClass) {
+		
+		//TODO 这里应该要进行map化处理，需要将类型判断做归一化处理
 
 		if (Number.class.isAssignableFrom(rClass)) {
 			if(Integer.class.isAssignableFrom(rClass)){

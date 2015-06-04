@@ -177,6 +177,16 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 		QuerySelect query = new QuerySelect(columns, matches, null, configKeeper.table());
 		String sql = query.getSQL();
 		Object[] params = query.getParams();
+		return countBySQL(sql, params);
+	}
+	
+	/**
+	 * 暴露SQL接口对外
+	 * @param sql
+	 * @param params
+	 * @return
+	 */
+	protected int countBySQL(String sql, Object[] params){
 		return jdbcTemplate.queryForInt(sql, params);
 	}
 
