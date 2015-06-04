@@ -373,13 +373,13 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	 * @param matches	匹配条件，可为null
 	 * @param orders	匹配条件，可为null
 	 * @param offset	起始位置
-	 * @param limit	获取条数
+	 * @param rows	获取条数
 	 * @return
 	 * created by Tianxin on 2015年6月3日 下午8:47:09
 	 */
-	protected List<ENTITY> page(Matches matches, Orders orders, int offset, int limit) {
+	protected List<ENTITY> page(Matches matches, Orders orders, int offset, int rows) {
 		List<String> allColumns = queryHandler.allColumns();
-		return pageColumns(matches, orders, offset, limit, allColumns.toArray(new String[allColumns.size()]));
+		return pageColumns(matches, orders, offset, rows, allColumns.toArray(new String[allColumns.size()]));
 	}
 
 	/**
@@ -410,14 +410,14 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	 * @param matches	匹配条件，可为null
 	 * @param orders	排序规则，可为null
 	 * @param offset	起始位置
-	 * @param limit	获取条数
+	 * @param rows	获取条数
 	 * @param columns	字段集合
 	 * @return
 	 * created by Tianxin on 2015年6月3日 下午8:50:57
 	 */
-	protected List<ENTITY> pageColumns(Matches matches, Orders orders, int offset, int limit, String... columns) {
+	protected List<ENTITY> pageColumns(Matches matches, Orders orders, int offset, int rows, String... columns) {
 		List<String> choozenColumns = Arrays.asList(columns);
-		QuerySelect query = new QuerySelect(choozenColumns, matches, orders, configKeeper.table(), offset, limit);
+		QuerySelect query = new QuerySelect(choozenColumns, matches, orders, configKeeper.table(), offset, rows);
 		String sql = query.getSQL();
 		Object[] params = query.getParams();
 		return jdbcTemplate.query(sql, params, new EntityMapper<ENTITY>(choozenColumns, columnMappers, entityClass));
@@ -441,13 +441,13 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	 * @param matches	匹配条件
 	 * @param column	字段名
 	 * @param offset	起始位置
-	 * @param limit	获取条数
+	 * @param rows	获取条数
 	 * @return
 	 * created by Tianxin on 2015年6月3日 下午8:48:26
 	 */
-	protected <R extends Serializable> List<R> pageOneColumn(Class<R> rClass, Matches matches, String column, int offset, int limit) {
+	protected <R extends Serializable> List<R> pageOneColumn(Class<R> rClass, Matches matches, String column, int offset, int rows) {
 		List<String> columns = Arrays.asList(column);
-		QuerySelect query = new QuerySelect(columns, matches, null, configKeeper.table(), offset, limit);
+		QuerySelect query = new QuerySelect(columns, matches, null, configKeeper.table(), offset, rows);
 		String sql = query.getSQL();
 		Object[] params = query.getParams();
 		return jdbcTemplate.query(sql, params, BasicMappers.getMapper(rClass));
