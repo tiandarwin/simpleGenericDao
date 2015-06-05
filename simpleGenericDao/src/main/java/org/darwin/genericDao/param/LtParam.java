@@ -7,7 +7,7 @@ package org.darwin.genericDao.param;
 import java.util.Arrays;
 import java.util.List;
 
-import org.darwin.common.utils.GenericDaoUtils;
+import org.darwin.common.utils.Utils;
 
 /**
  * created by Tianxin on 2015年5月27日 下午2:01:06
@@ -31,7 +31,7 @@ public class LtParam implements Param {
 	}
 
 	public String buildOperate(String column) {
-		return GenericDaoUtils.connect(column, withEqual ? " <= ?" : " < ?");
+		return Utils.connect(column, withEqual ? " <= ?" : " < ?");
 	}
 
 }

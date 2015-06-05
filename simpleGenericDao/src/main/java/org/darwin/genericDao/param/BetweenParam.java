@@ -7,7 +7,7 @@ package org.darwin.genericDao.param;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.darwin.common.utils.GenericDaoUtils;
+import org.darwin.common.utils.Utils;
 
 /**
  * mysql的between是包含边界值的
@@ -42,11 +42,11 @@ public class BetweenParam implements Param {
 		if(start == null && end == null){
 			throw new RuntimeException("your code error!! start and end can't be null together");
 		}else if(end == null){
-			return GenericDaoUtils.connect(column, ">=?");
+			return Utils.connect(column, ">=?");
 		}else if(start == null){
-			return GenericDaoUtils.connect(column, "<=?");
+			return Utils.connect(column, "<=?");
 		}else {
-			return GenericDaoUtils.connect(column, " between ? and ?");
+			return Utils.connect(column, " between ? and ?");
 		}
 	}
 

@@ -2,7 +2,7 @@
  * org.darwin.samples.Plan.java
  * created by Tianxin(tianjige@163.com) on 2015年5月26日 下午8:47:02
  */
-package org.darwin.samples;
+package org.darwin.samples.test;
 
 import java.util.Date;
 
@@ -14,7 +14,7 @@ import org.darwin.genericDao.bo.UserObject;
  * 一个叫做计划的对象
  * created by Tianxin on 2015年5月26日 下午8:47:02
  */
-@Table(name = "plan", keyColumn = "id", db = "database", audoIncrementKey = true)
+@Table(name = "plan", keyColumn = "id", db = "database")
 public class Plan extends UserObject<Integer> {
 	
 	static class Columns{

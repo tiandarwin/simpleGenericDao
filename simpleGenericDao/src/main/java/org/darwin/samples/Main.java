@@ -6,6 +6,9 @@ package org.darwin.samples;
 
 import java.util.Arrays;
 
+import org.darwin.samples.test.PlanDao;
+import org.darwin.samples.test.PlanDaoImpl;
+
 
 /**
  * created by Tianxin on 2015年6月1日 下午2:19:12
@@ -26,6 +29,6 @@ public class Main {
 	 */
 	private static void setJdbcTemplate(PlanDao dao) {
 		PlanDaoImpl impl = (PlanDaoImpl)dao;
-		impl.setJdbcTemplate(new MyJdbcTemplate());
+		impl.setJdbcTemplate(new MockJdbcTemplate());
 	}
 }

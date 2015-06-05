@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.darwin.common.utils.GenericDaoUtils;
+import org.darwin.common.utils.Utils;
 
 /**
  * created by Tianxin on 2015年5月27日 下午2:06:01
@@ -151,13 +151,13 @@ public class NormalParam implements Param {
 
 	public String buildOperate(String column) {
 		if (value == null) {
-			return GenericDaoUtils.connect(column, " is null");
+			return Utils.connect(column, " is null");
 		} else if (value instanceof Collection) {
 			return buildCollectionOperate(column);
 		} else if (value.getClass().isArray()) {
 			return buildArrayOperate(column);
 		} else {
-			return GenericDaoUtils.connect(column, "=?");
+			return Utils.connect(column, "=?");
 		}
 	}
 
@@ -170,9 +170,9 @@ public class NormalParam implements Param {
 		if (array.length == 0) {
 			return "1 != 1";
 		} else if (array.length == 1) {
-			return GenericDaoUtils.connect(column, "=?");
+			return Utils.connect(column, "=?");
 		} else {
-			return GenericDaoUtils.connect(column, " in ", buildInOperate(array.length));
+			return Utils.connect(column, " in ", buildInOperate(array.length));
 		}
 	}
 
@@ -187,9 +187,9 @@ public class NormalParam implements Param {
 		if (coll.size() == 0) {
 			return "1 != 1";
 		} else if (coll.size() == 1) {
-			return GenericDaoUtils.connect(column, "=?");
+			return Utils.connect(column, "=?");
 		} else {
-			return GenericDaoUtils.connect(column, " in ", buildInOperate(coll.size()));
+			return Utils.connect(column, " in ", buildInOperate(coll.size()));
 		}
 	}
 

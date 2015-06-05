@@ -9,13 +9,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.darwin.common.utils.GenericDaoUtils;
+import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.annotations.Sequence;
 import org.darwin.genericDao.annotations.Table;
 import org.darwin.genericDao.bo.BaseObject;
@@ -24,7 +24,7 @@ import org.darwin.genericDao.mapper.AnnotationConfigKeeper;
 import org.darwin.genericDao.mapper.BasicMappers;
 import org.darwin.genericDao.mapper.ColumnMapper;
 import org.darwin.genericDao.mapper.EntityMapper;
-import org.darwin.genericDao.mapper.QueryHandler;
+import org.darwin.genericDao.mapper.WriteSQLHandler;
 import org.darwin.genericDao.operate.Matches;
 import org.darwin.genericDao.operate.Modifies;
 import org.darwin.genericDao.operate.Orders;
@@ -56,14 +56,23 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 		this.keyClass = GenericDaoUtils.getKeyClass(entityClass);
 		this.configKeeper = new AnnotationConfigKeeper(table, sequence);
 		this.columnMappers = GenericDaoUtils.generateColumnMappers(entityClass, table.columnStyle());
-		this.queryHandler = new QueryHandler<KEY, ENTITY>(columnMappers, configKeeper);
+		this.queryHandler = new WriteSQLHandler<KEY, ENTITY>(columnMappers, configKeeper);
 	}
-
+	
+	/**
+	 * 获取表名
+	 * @return
+	 * created by Tianxin on 2015年6月4日 下午2:29:52
+	 */
+	protected String table(){
+		return configKeeper.table();
+	}
+	
 	private Class<KEY> keyClass;
 	private Class<ENTITY> entityClass;
 	private JdbcTemplate jdbcTemplate;
 	private AnnotationConfigKeeper configKeeper;
-	private QueryHandler<KEY, ENTITY> queryHandler;
+	private WriteSQLHandler<KEY, ENTITY> queryHandler;
 	private Map<String, ColumnMapper> columnMappers;
 
 	/**
@@ -90,7 +99,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 		}
 
 		// 获取sql以及参数
-		List<ENTITY> entities = GenericDaoUtils.toEntities(entity);
+		List<ENTITY> entities = Utils.toEntities(entity);
 		final String sql = queryHandler.generateInsertSQL(entities);
 		final Object[] params = queryHandler.generateInsertParams(entities);
 		
@@ -173,12 +182,12 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	}
 
 	public int delete(Collection<ENTITY> entities) {
-		entities = GenericDaoUtils.trimEntities(entities);
+		entities = Utils.trimEntities(entities);
 		if (entities == null || entities.size() == 0) {
 			return 0;
 		}
 
-		List<KEY> ids = GenericDaoUtils.extractKeys(entities);
+		List<KEY> ids = Utils.extractKeys(entities);
 		return delete(configKeeper.keyColumn(), ids);
 	}
 
@@ -233,7 +242,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	public int update(Collection<ENTITY> entities) {
 	
 		// 如果为空或这个集合都是空对象，则不更新
-		final List<ENTITY> list = GenericDaoUtils.trimEntities(entities);
+		final List<ENTITY> list = Utils.trimEntities(entities);
 		if (list == null || list.size() == 0) {
 			return 0;
 		}
@@ -505,18 +514,6 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	 */
 	protected int countBySQL(String sql, Object[] params){
 		return jdbcTemplate.queryForInt(sql, params);
-	}
-
-	protected List<Object> toList(Object... os) {
-		if (os == null || os.length == 0) {
-			return new ArrayList<Object>(0);
-		}
-
-		List<Object> list = new ArrayList<Object>(os.length);
-		for (Object o : os) {
-			list.add(o);
-		}
-		return list;
 	}
 
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {

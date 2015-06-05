@@ -4,7 +4,7 @@
  */
 package org.darwin.genericDao.mapper.stat;
 
-import org.darwin.common.utils.GenericDaoUtils;
+import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.annotations.stat.StatTable;
 
 /**
@@ -34,7 +34,7 @@ public class StatAnnotationKeeper {
 
 	public String table(){
 		//TODO表名生成逻辑，这里的生成逻辑需要外部能够注入
-		return GenericDaoUtils.connect(table.db(), '.', table.name());
+		return Utils.connect(table.db(), '.', table.name());
 	}
 
 }

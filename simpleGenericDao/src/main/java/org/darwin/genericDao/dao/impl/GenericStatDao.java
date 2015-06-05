@@ -12,13 +12,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.darwin.common.utils.StatGenericDaoUtils;
+import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.annotations.stat.StatTable;
 import org.darwin.genericDao.bo.BaseObject;
 import org.darwin.genericDao.bo.BaseStatObject;
 import org.darwin.genericDao.mapper.BasicMappers;
+import org.darwin.genericDao.mapper.ColumnMapper;
 import org.darwin.genericDao.mapper.EntityMapper;
 import org.darwin.genericDao.mapper.stat.StatAnnotationKeeper;
-import org.darwin.genericDao.mapper.stat.StatColumnMapper;
+import org.darwin.genericDao.mapper.stat.StatWriteSQLHandler;
 import org.darwin.genericDao.operate.Groups;
 import org.darwin.genericDao.operate.Matches;
 import org.darwin.genericDao.operate.Orders;
@@ -42,8 +44,20 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 
 		this.entityClass = entityClass;
 		this.configKeeper = new StatAnnotationKeeper(table);
-		this.columnMappers = StatGenericDaoUtils.generateStatColumnMappers(entityClass, table.columnStyle());
+		this.columnMappers = StatGenericDaoUtils.generateColumnMappers(entityClass, table.columnStyle());
+		this.writeHandler = new StatWriteSQLHandler<ENTITY>(columnMappers, configKeeper);
 		this.analysisColumns(columnMappers);
+	}
+	
+	public boolean create(ENTITY entity){
+		return create(Utils.one2List(entity)) >= 1;
+		
+	}
+	
+	public int create(List<ENTITY> entities){
+		String sql = writeHandler.generateInsertSQL(entities);
+		Object[] args = writeHandler.generateInsertParams(entities);
+		return jdbcTemplate.update(sql, args);
 	}
 	
 	/**
@@ -51,22 +65,32 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 	 * @param columnMappers
 	 * created by Tianxin on 2015年6月3日 下午3:56:37
 	 */
-	private void analysisColumns(Map<String, StatColumnMapper> columnMappers) {
-		Collection<StatColumnMapper> mappers = columnMappers.values();
-		for (StatColumnMapper mapper : mappers) {
-			allColumns.add(mapper.getColumn());
+	private void analysisColumns(Map<String, ColumnMapper> columnMappers) {
+		Collection<ColumnMapper> mappers = columnMappers.values();
+		for (ColumnMapper mapper : mappers) {
+			
+			//如果咩有统计类型的设置，则直接跳过
+			allColumns.add(mapper.getSQLColumn());
+			if(mapper.getType() == null){
+				continue;
+			}
+			
+			//根据统计类型放到不同的地方
 			switch (mapper.getType().value()) {
 			case KEY:
-				keyColumns.add(mapper.getColumn());
+				keyColumns.add(mapper.getSQLColumn());
 				break;
 			case SUM:
-				sumColumns.add(mapper.getColumn());
+				sumColumns.add(mapper.getSQLColumn());
 				break;
 			case AVG:
-				avgColumns.add(mapper.getColumn());
+				avgColumns.add(mapper.getSQLColumn());
+				break;
+			case EXTEND:
+				extendColumns.add(mapper.getSQLColumn());
 				break;
 			case DATE:
-				dateColumn = mapper.getColumn();
+				dateColumn = mapper.getSQLColumn();
 				keyColumns.add(dateColumn);
 				break;
 			default:
@@ -79,11 +103,13 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 	private List<String> avgColumns = new ArrayList<String>();
 	private List<String> keyColumns = new ArrayList<String>();
 	private List<String> allColumns = new ArrayList<String>();
+	private List<String> extendColumns = new ArrayList<String>();
 	
 	private Class<ENTITY> entityClass = null;
 	private JdbcTemplate jdbcTemplate;
 	private StatAnnotationKeeper configKeeper;
-	private Map<String, StatColumnMapper> columnMappers;
+	private Map<String, ColumnMapper> columnMappers;
+	private StatWriteSQLHandler<ENTITY> writeHandler;
 	
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
@@ -97,7 +123,32 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 	 */
 	public List<ENTITY> statAll(boolean aggregationByDate) {
 		Groups groups = aggregationByDate ? generateAggergationByDateGroups() : Groups.init();
-		QueryStat query = new QueryStat(sumColumns, avgColumns, keyColumns, null, null, groups, configKeeper.table());
+		return statByMgo(null, groups, null);
+	}
+	
+	/**
+	 * 根据匹配条件，分组规则，排序规则进行统计
+	 * @param matches
+	 * @param groups
+	 * @param orders
+	 * @return
+	 * created by Tianxin on 2015年6月4日 下午8:23:27
+	 */
+	public List<ENTITY> statByMgo(Matches matches, Groups groups, Orders orders){
+		QueryStat query = new QueryStat(sumColumns, avgColumns, extendColumns, keyColumns, matches, orders, groups, configKeeper.table());
+		return statByQuery(query);
+	}
+	
+	/**
+	 * 根据匹配条件，分组规则，排序规则进行统计
+	 * @param matches
+	 * @param groups
+	 * @param orders
+	 * @return
+	 * created by Tianxin on 2015年6月4日 下午8:23:27
+	 */
+	public List<ENTITY> statPageByMgo(Matches matches, Groups groups, Orders orders, int offset, int rows){
+		QueryStat query = new QueryStat(sumColumns, avgColumns, extendColumns, keyColumns, matches, orders, groups, configKeeper.table(), offset, rows);
 		return statByQuery(query);
 	}
 
@@ -112,7 +163,6 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 		String sql = query.getSQL();
 		Object[] params = query.getParams();
 		List<String> columns = query.getColumns();
-		System.out.println(sql);
 		return jdbcTemplate.query(sql, params, new EntityMapper(columns, columnMappers, entityClass));
 	}
 
@@ -127,8 +177,7 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 	public List<ENTITY> statByRange(int startDate, int endDate, boolean aggregationByDate) {
 		Matches matches = Matches.one(dateColumn, SQLParams.between(startDate, endDate));
 		Groups groups = aggregationByDate ? generateAggergationByDateGroups() : Groups.init();
-		QueryStat query = new QueryStat(sumColumns, avgColumns, keyColumns, matches, null, groups, configKeeper.table());
-		return statByQuery(query);
+		return statByMgo(matches, groups, null);
 	}
 
 	/**
@@ -363,18 +412,4 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 	protected <E extends BaseObject<?>> List<E> findBySQL(Class<E> eClass, String sql, Object... params) {
 		return jdbcTemplate.query(sql, params, BasicMappers.getEntityMapper(eClass, sql));
 	}
-
-	protected List<Object> toList(Object... os) {
-		if (os == null || os.length == 0) {
-			return new ArrayList<Object>(0);
-		}
-
-		List<Object> list = new ArrayList<Object>(os.length);
-		for (Object o : os) {
-			list.add(o);
-		}
-		return list;
-	}
-
-
 }

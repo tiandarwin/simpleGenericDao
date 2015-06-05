@@ -7,7 +7,7 @@ package org.darwin.genericDao.param;
 import java.util.Arrays;
 import java.util.List;
 
-import org.darwin.common.utils.GenericDaoUtils;
+import org.darwin.common.utils.Utils;
 
 /**
  * created by Tianxin on 2015年5月27日 下午1:59:59
@@ -37,14 +37,14 @@ public class LikeParam implements Param {
 	}
 
 	public List<Object> getParams() {
-		return Arrays.asList((Object)(GenericDaoUtils.connect(leftStrict ? "" : "%", value, rightStrict ? "" : "%")));
+		return Arrays.asList((Object)(Utils.connect(leftStrict ? "" : "%", value, rightStrict ? "" : "%")));
 	}
 
 	public String buildOperate(String column) {
 		if (leftStrict && rightStrict) {
-			return GenericDaoUtils.connect(column, " = ?");
+			return Utils.connect(column, " = ?");
 		} else {
-			return GenericDaoUtils.connect(column, " like ?");
+			return Utils.connect(column, " like ?");
 		}
 	}
 

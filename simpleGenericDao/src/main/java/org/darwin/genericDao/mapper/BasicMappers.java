@@ -13,11 +13,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.darwin.common.utils.GenericDaoUtils;
+import org.darwin.common.utils.Utils;
 import org.springframework.jdbc.core.RowMapper;
 
 /**
@@ -28,9 +28,9 @@ public class BasicMappers {
 	/**
 	 * 将N个类各自的映射关系做一个map
 	 */
-	private static Map<Class<?>, Map<String, ColumnMapper>> columnMappersMap = new HashMap<Class<?>, Map<String,ColumnMapper>>(256);
+	private static Map<Class<?>, Map<String, ColumnMapper>> columnMappersMap = Utils.newMap(64);
 	
-	private static Map<Class<?>, Class<?>> entityKeyClassMap = new HashMap<Class<?>, Class<?>>();
+	private static Map<Class<?>, Class<?>> entityKeyClassMap = Utils.newMap(16);
 	
 	/**
 	 * 获取一个实体类的主键类型
@@ -84,7 +84,7 @@ public class BasicMappers {
 	 * @return created by Tianxin on 2015年6月1日 下午1:49:42
 	 */
 	@SuppressWarnings("unchecked")
-	public static <R> RowMapper<R> getMapper(Class<R> rClass) {
+	public static <R> RowMapper<R> getMapper(final Class<R> rClass) {
 		
 		//TODO 这里应该要进行map化处理，需要将类型判断做归一化处理
 

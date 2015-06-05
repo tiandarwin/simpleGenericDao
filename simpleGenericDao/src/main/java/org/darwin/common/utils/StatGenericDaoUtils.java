@@ -8,16 +8,15 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.darwin.genericDao.annotations.Column;
 import org.darwin.genericDao.annotations.enums.ColumnStyle;
-import org.darwin.genericDao.annotations.stat.StatType;
 import org.darwin.genericDao.annotations.stat.StatTable;
+import org.darwin.genericDao.annotations.stat.StatType;
 import org.darwin.genericDao.bo.BaseStatObject;
-import org.darwin.genericDao.mapper.stat.StatColumnMapper;
+import org.darwin.genericDao.mapper.ColumnMapper;
 
 /**
  * 统计的通用dao的工具方法集合 created by Tianxin on 2015年6月3日 下午2:17:14
@@ -86,7 +85,7 @@ public class StatGenericDaoUtils {
 	 * @param entityClass
 	 * @return created by Tianxin on 2015年6月1日 上午10:26:05
 	 */
-	public static <ENTITY extends BaseStatObject> Map<String, StatColumnMapper> generateStatColumnMappers(Class<ENTITY> entityClass,
+	public static <ENTITY extends BaseStatObject> Map<String, ColumnMapper> generateColumnMappers(Class<ENTITY> entityClass,
 			ColumnStyle columnStyle) {
 
 		// 获取get方法、set方法、属性的列表
@@ -99,7 +98,7 @@ public class StatGenericDaoUtils {
 		Map<String, Method> setterMap = GenericDaoUtils.trans2SetterMap(setters);
 
 		// 以getter方法做循环，找到配对的方法和属性信息
-		Map<String, StatColumnMapper> columnMappers = new HashMap<String, StatColumnMapper>(50);
+		Map<String, ColumnMapper> columnMappers = Utils.newMap(16);
 		for (Method getter : getters) {
 
 			// 推导对一个的setter名字与field名字
@@ -118,7 +117,7 @@ public class StatGenericDaoUtils {
 
 			Column column = GenericDaoUtils.fetchColumn(field, getter, setter, entityClass);
 			StatType type = fetchColumnType(field, getter, setter, entityClass);
-			StatColumnMapper columnMapper = new StatColumnMapper(getter, setter, column, columnStyle, type);
+			ColumnMapper columnMapper = new ColumnMapper(getter, setter, column, columnStyle, type);
 			columnMappers.put(columnMapper.getColumn(), columnMapper);
 		}
 

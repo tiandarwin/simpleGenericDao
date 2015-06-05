@@ -7,7 +7,7 @@ package org.darwin.genericDao.operate;
 import java.util.Collections;
 import java.util.List;
 
-import org.darwin.common.utils.GenericDaoUtils;
+import org.darwin.common.utils.Utils;
 
 /**
  * created by Tianxin on 2015年5月27日 下午12:08:14
@@ -42,7 +42,7 @@ public class Order implements Operate {
 	private boolean asc;
 
 	public String getOperate() {
-		return asc ? column : GenericDaoUtils.connect(column, " desc");
+		return asc ? column : Utils.connect(column, " desc");
 	}
 
 	public List<Object> getParams() {

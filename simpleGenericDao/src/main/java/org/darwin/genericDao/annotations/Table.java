@@ -51,11 +51,12 @@ public @interface Table {
     String keyColumn() default "id";
     
     /**
+     * 这里感觉意义不大
      * 该表的主键是否是自动生成
      * @return
      * created by Tianxin on 2015年6月1日 下午2:57:20
-     */
     boolean audoIncrementKey() default false;
+     */
     
     /**
      * 对象属性到数据库列的映射规则，默认为 {@link ColumnStyle#LOWER_CASE}向前兼容

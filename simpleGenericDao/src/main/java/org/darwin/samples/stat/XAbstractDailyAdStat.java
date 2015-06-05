@@ -4,6 +4,7 @@
  */
 package org.darwin.samples.stat;
 
+import org.darwin.genericDao.annotations.Column;
 import org.darwin.genericDao.annotations.enums.Type;
 import org.darwin.genericDao.annotations.stat.StatType;
 import org.darwin.genericDao.bo.BaseStatObject;
@@ -38,6 +39,10 @@ public abstract class XAbstractDailyAdStat extends BaseStatObject {
 	@StatType(Type.AVG)
 	private long consumed;
 	
+	@Column("click_num/show_num as ctr")
+	@StatType(Type.EXTEND)
+	private float ctr;
+	
 	public int getDate() {
 		return date;
 	}
@@ -62,4 +67,11 @@ public abstract class XAbstractDailyAdStat extends BaseStatObject {
 	public void setConsumed(long consumed) {
 		this.consumed = consumed;
 	}
+	public float getCtr() {
+		return ctr;
+	}
+	public void setCtr(float ctr) {
+		this.ctr = ctr;
+	}
+	
 }

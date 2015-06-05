@@ -13,10 +13,8 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -205,7 +203,7 @@ public class GenericDaoUtils {
 		Map<String, Method> setterMap = trans2SetterMap(setters);
 
 		// 以getter方法做循环，找到配对的方法和属性信息
-		Map<String, ColumnMapper> columnMappers = new HashMap<String, ColumnMapper>(50);
+		Map<String, ColumnMapper> columnMappers = Utils.newMap(16);
 		for (Method getter : getters) {
 
 			// 推导对一个的setter名字与field名字
@@ -331,7 +329,7 @@ public class GenericDaoUtils {
 			return Collections.emptyMap();
 		}
 
-		Map<String, Method> methodMap = new HashMap<String, Method>(methods.size() * 2);
+		Map<String, Method> methodMap = Utils.newMap(methods.size());
 		for (Method m : methods) {
 			String name = m.getName() + "." + m.getParameterTypes()[0].getName();
 			if (!methodMap.containsKey(name)) {
@@ -353,7 +351,7 @@ public class GenericDaoUtils {
 			return Collections.emptyMap();
 		}
 
-		Map<String, Field> fieldMap = new HashMap<String, Field>(fields.size() * 2);
+		Map<String, Field> fieldMap = Utils.newMap(fields.size());
 		for (Field f : fields) {
 			String name = f.getName() + "." + f.getType().getName();
 			if (!fieldMap.containsKey(name)) {
@@ -554,65 +552,5 @@ public class GenericDaoUtils {
 		}
 
 		return fields;
-	}
-
-	/**
-	 * 字符串连接
-	 * 
-	 * @param os
-	 * @return
-	 */
-	public final static String connect(Object... os) {
-		if (os == null || os.length == 0) {
-			return "";
-		}
-		StringBuilder sb = new StringBuilder(os.length * 5);
-		for (Object o : os) {
-			sb.append(o);
-		}
-		return sb.toString();
-	}
-
-	/**
-	 * 提取key的集合
-	 * 
-	 * @param entities
-	 * @return created by Tianxin on 2015年5月28日 下午6:03:43
-	 */
-	public static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> List<KEY> extractKeys(Collection<ENTITY> entities) {
-
-		List<KEY> keys = new ArrayList<KEY>(entities.size());
-		for (ENTITY entity : entities) {
-			keys.add(entity.getId());
-		}
-		return keys;
-	}
-
-	/**
-	 * 去除不合法的entity
-	 * 
-	 * @param entities
-	 * @return created by Tianxin on 2015年5月28日 下午4:29:02
-	 */
-	public final static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> List<ENTITY> trimEntities(Collection<ENTITY> entities) {
-		if (entities == null || entities.size() == 0) {
-			return null;
-		}
-
-		ArrayList<ENTITY> list = new ArrayList<ENTITY>(entities.size());
-		for (ENTITY e : entities) {
-			if (e != null) {
-				list.add(e);
-			}
-		}
-		return list;
-	}
-
-	public final static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> List<ENTITY> toEntities(ENTITY... entities) {
-		List<ENTITY> entityList = new ArrayList<ENTITY>(1);
-		for (ENTITY entity : entities) {
-			entityList.add(entity);
-		}
-		return entityList;
 	}
 }

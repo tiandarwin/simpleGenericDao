@@ -14,7 +14,7 @@ import org.springframework.jdbc.core.RowMapper;
 /**
  * created by Tianxin on 2015年6月1日 下午2:22:13
  */
-public class MyJdbcTemplate extends JdbcTemplate {
+public class MockJdbcTemplate extends JdbcTemplate {
 
 	@Override
 	public int update(String sql, Object... args) throws DataAccessException {

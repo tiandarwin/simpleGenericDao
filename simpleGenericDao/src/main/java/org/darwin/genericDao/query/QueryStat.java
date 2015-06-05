@@ -34,20 +34,16 @@ public class QueryStat implements Query {
 		this.groups = groups;
 		this.table = table;
 	}
-
-	public QueryStat(List<String> sumColumns, List<String> avgColumns, List<String> keyColumns, Matches matches, Orders orders, Groups groups, String table) {
-		this(matches, orders, groups, table);
-		this.columns = buildColumns(sumColumns, avgColumns, keyColumns);
+	
+	public QueryStat(List<String> sumColumns, List<String> avgColumns, List<String> extendColumns, List<String> keyColumns, Matches matches, Orders orders, Groups groups, String table, int offset, int rows) {
+		this(sumColumns, avgColumns, extendColumns, keyColumns, matches, orders, groups, table);
+		this.offset = offset;
+		this.rows = rows;
 	}
 
-	public QueryStat(List<String> columns, Matches matches, Orders orders, Groups groups, String table) {
+	public QueryStat(List<String> sumColumns, List<String> avgColumns, List<String> extendColumns, List<String> keyColumns, Matches matches, Orders orders, Groups groups, String table) {
 		this(matches, orders, groups, table);
-		this.columns = buildColumns(null, null, columns);
-	}
-
-	public QueryStat(String columns, Matches matches, Orders orders, Groups groups, String table) {
-		this(matches, orders, groups, table);
-		this.columns = columns;
+		this.columns = buildColumns(sumColumns, avgColumns, extendColumns, keyColumns);
 	}
 
 	/**
@@ -58,7 +54,7 @@ public class QueryStat implements Query {
 	 * @param keyColumns
 	 *            created by Tianxin on 2015年6月3日 下午3:45:43
 	 */
-	private String buildColumns(List<String> sumColumns, List<String> avgColumns, List<String> keyColumns) {
+	private String buildColumns(List<String> sumColumns, List<String> avgColumns, List<String> extendColumns, List<String> keyColumns) {
 		StringBuilder sb = new StringBuilder(512);
 		
 		//如果没有groupBy就没有必要做sum或者avg
@@ -90,13 +86,12 @@ public class QueryStat implements Query {
 		if (matches != null && !matches.isEmpty()) {
 			sb.append(" where ").append(matches.getOperate());
 		}
-		if (orders != null && !orders.isEmpty()) {
-			sb.append(" order by ").append(orders.getOperate());
-		}
 		if (groups != null && !groups.isEmpty()) {
 			sb.append(" group by ").append(groups.getOperate());
 		}
-
+		if (orders != null && !orders.isEmpty()) {
+			sb.append(" order by ").append(orders.getOperate());
+		}
 		if (rows != 0) {
 			sb.append(" limit ").append(offset).append(',').append(rows);
 		}

@@ -4,7 +4,7 @@
  */
 package org.darwin.genericDao.mapper;
 
-import org.darwin.common.utils.GenericDaoUtils;
+import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.annotations.Sequence;
 import org.darwin.genericDao.annotations.Table;
 
@@ -33,7 +33,10 @@ public class AnnotationConfigKeeper {
 
 	public String table(){
 		//TODO表名生成逻辑，这里的生成逻辑需要外部能够注入
-		return GenericDaoUtils.connect(table.db(), '.', table.name());
+		if(Utils.isEmpty(table.db())){
+			return table.name();
+		}
+		return Utils.connect(table.db(), '.', table.name());
 	}
 
 	/**
