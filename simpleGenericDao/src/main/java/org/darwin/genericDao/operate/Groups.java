@@ -60,9 +60,16 @@ public class Groups implements Operate {
 	public Groups groupBy(String column) {
 		groups.add(column);
 		return this;
-
+	}
+	
+	/**
+	 * 获取groupby的字段列表
+	 * @return
+	 * created by Tianxin on 2015年6月7日 下午2:17:51
+	 */
+	public List<String> getGroupByColumns(){
+		return groups;
 	}
 
 	private List<String> groups = new ArrayList<String>();
-
 }

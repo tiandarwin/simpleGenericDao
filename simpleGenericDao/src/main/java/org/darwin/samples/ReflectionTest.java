@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
 public class ReflectionTest {
 
 	public static void main(String[] args) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException {
-		long times = 10000 * 10000l;
+		long times = 10000000l;
 		run(times);
 		runReflection(times);
 	}

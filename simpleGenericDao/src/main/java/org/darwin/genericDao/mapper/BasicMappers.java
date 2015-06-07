@@ -4,20 +4,15 @@
  */
 package org.darwin.genericDao.mapper;
 
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
 import org.darwin.common.utils.GenericDaoUtils;
 import org.darwin.common.utils.Utils;
+import org.darwin.genericDao.mapper.jdbc.FetcherCache;
+import org.darwin.genericDao.mapper.jdbc.TypeFetcher;
 import org.springframework.jdbc.core.RowMapper;
 
 /**
@@ -83,111 +78,12 @@ public class BasicMappers {
 	 * @param rClass
 	 * @return created by Tianxin on 2015年6月1日 下午1:49:42
 	 */
-	@SuppressWarnings("unchecked")
-	public static <R> RowMapper<R> getMapper(final Class<R> rClass) {
-		
-		//TODO 这里应该要进行map化处理，需要将类型判断做归一化处理
-
-		if (Number.class.isAssignableFrom(rClass)) {
-			if(Integer.class.isAssignableFrom(rClass)){
-				return new RowMapper<R>() {
-					public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return (R) Integer.valueOf(rs.getInt(0));
-					}
-				};
-			}else if(Long.class.isAssignableFrom(rClass)){
-				return new RowMapper<R>() {
-					public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return (R) Long.valueOf(rs.getLong(0));
-					}
-				};
-			}else if(Float.class.isAssignableFrom(rClass)){
-				return new RowMapper<R>() {
-					public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return (R) Float.valueOf(rs.getFloat(0));
-					}
-				};
-			}else if(Double.class.isAssignableFrom(rClass)){
-				return new RowMapper<R>() {
-					public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return (R) Double.valueOf(rs.getDouble(0));
-					}
-				};
-			}else if(Short.class.isAssignableFrom(rClass)){
-				return new RowMapper<R>() {
-					public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return (R) Short.valueOf(rs.getShort(0));
-					}
-				};
-			}else if(Boolean.class.isAssignableFrom(rClass)){
-				return new RowMapper<R>() {
-					public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return (R) Boolean.valueOf(rs.getBoolean(0));
-					}
-				};
-			}else if(Byte.class.isAssignableFrom(rClass)){
-				return new RowMapper<R>() {
-					public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return (R) Byte.valueOf(rs.getByte(0));
-					}
-				};
-			}
-
-		} else if (String.class.isAssignableFrom(rClass)) {
-			return new RowMapper<R>() {
-				public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return (R) rs.getString(0);
-				}
-			};
-		} else if (java.util.Date.class.isAssignableFrom(rClass)) {
-			if (Date.class.isAssignableFrom(rClass)) {
-				return new RowMapper<R>() {
-					public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return (R) rs.getDate(0);
-					}
-				};
-			} else if (Timestamp.class.isAssignableFrom(rClass)) {
-				return new RowMapper<R>() {
-					public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return (R) rs.getTimestamp(0);
-					}
-				};
-			} else if (Time.class.isAssignableFrom(rClass)) {
-				return new RowMapper<R>() {
-					public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return (R) rs.getTime(0);
-					}
-				};
-			}
-		} else if(BigDecimal.class.isAssignableFrom(rClass)){
-			return  new RowMapper<R>() {
-				public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return (R) rs.getBigDecimal(0);
-				}
-			};
-		} else if(URL.class.isAssignableFrom(rClass)){
-			return  new RowMapper<R>() {
-				public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return (R) rs.getURL(0);
-				}
-			};
-		} else if(Blob.class.isAssignableFrom(rClass)){
-			return  new RowMapper<R>() {
-				public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return (R) rs.getBlob(0);
-				}
-			};
-		} else if(Clob.class.isAssignableFrom(rClass)){
-			return  new RowMapper<R>() {
-				public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return (R) rs.getClob(0);
-				}
-			};
-		}
-
+	public static <R> RowMapper<R> getMapper(Class<R> rClass) {
+		final TypeFetcher fetcher = FetcherCache.getFetcher(rClass);
 		return new RowMapper<R>() {
+
 			public R mapRow(ResultSet rs, int rowNum) throws SQLException {
-				return (R) rs.getObject(0);
+				return (R)(fetcher.getFromResultSet(rs, 1));
 			}
 		};
 	}

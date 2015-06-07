@@ -25,6 +25,8 @@ import org.darwin.genericDao.operate.Groups;
 import org.darwin.genericDao.operate.Matches;
 import org.darwin.genericDao.operate.Orders;
 import org.darwin.genericDao.param.SQLParams;
+import org.darwin.genericDao.query.Query;
+import org.darwin.genericDao.query.QueryDistinctCount;
 import org.darwin.genericDao.query.QuerySelect;
 import org.darwin.genericDao.query.QueryStat;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -151,6 +153,18 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 		QueryStat query = new QueryStat(sumColumns, avgColumns, extendColumns, keyColumns, matches, orders, groups, configKeeper.table(), offset, rows);
 		return statByQuery(query);
 	}
+	
+	/**
+	 * 根据匹配条件，分组规则，计算数据总数
+	 * @param matches
+	 * @param groups
+	 * @return
+	 * created by Tianxin on 2015年6月4日 下午8:23:27
+	 */
+	public int statCountByMg(Matches matches, Groups groups){
+		List<String> columns = groups.getGroupByColumns();
+		return countDistinct(matches, columns.toArray(new String[columns.size()]));
+	}
 
 	/**
 	 * 按Query进行查询
@@ -224,6 +238,33 @@ public class GenericStatDao<ENTITY extends BaseStatObject>{
 	protected int count(Matches matches) {
 		List<String> columns = Arrays.asList("count(1)");
 		QuerySelect query = new QuerySelect(columns, matches, null, configKeeper.table());
+		String sql = query.getSQL();
+		Object[] params = query.getParams();
+		return countBySQL(sql, params);
+	}
+	
+	/**
+	 * 查询符合条件的记录条数
+	 * @param column	字段名字
+	 * @param value	字段匹配值
+	 * @param targetColumns	要做distinct count的字段
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:51:43
+	 */
+	protected int countDistinct(String column, Object value, String...targetColumns) {
+		return countDistinct(Matches.one(column, value), targetColumns);
+	}
+	
+	/**
+	 * 查询符合条件的结果条数
+	 * @param matches	匹配条件，可为null
+	 * @param targetColumns	要做distinct count的字段，可以是"*"
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:52:01
+	 */
+	protected int countDistinct(Matches matches, String...targetColumns){
+		Query query = new QueryDistinctCount(configKeeper.table(), matches, targetColumns);
+		
 		String sql = query.getSQL();
 		Object[] params = query.getParams();
 		return countBySQL(sql, params);

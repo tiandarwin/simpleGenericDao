@@ -20,15 +20,15 @@ import org.darwin.genericDao.annotations.Sequence;
 import org.darwin.genericDao.annotations.Table;
 import org.darwin.genericDao.bo.BaseObject;
 import org.darwin.genericDao.dao.BaseDao;
-import org.darwin.genericDao.mapper.AnnotationConfigKeeper;
 import org.darwin.genericDao.mapper.BasicMappers;
 import org.darwin.genericDao.mapper.ColumnMapper;
 import org.darwin.genericDao.mapper.EntityMapper;
-import org.darwin.genericDao.mapper.WriteSQLHandler;
 import org.darwin.genericDao.operate.Matches;
 import org.darwin.genericDao.operate.Modifies;
 import org.darwin.genericDao.operate.Orders;
+import org.darwin.genericDao.query.Query;
 import org.darwin.genericDao.query.QueryDelete;
+import org.darwin.genericDao.query.QueryDistinctCount;
 import org.darwin.genericDao.query.QueryModify;
 import org.darwin.genericDao.query.QuerySelect;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -501,6 +501,33 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 	protected int count(Matches matches) {
 		List<String> columns = Arrays.asList("count(1)");
 		QuerySelect query = new QuerySelect(columns, matches, null, configKeeper.table());
+		String sql = query.getSQL();
+		Object[] params = query.getParams();
+		return countBySQL(sql, params);
+	}
+	
+	/**
+	 * 查询符合条件的记录条数
+	 * @param column	字段名字
+	 * @param value	字段匹配值
+	 * @param targetColumns	要做distinct count的字段
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:51:43
+	 */
+	protected int countDistinct(String column, Object value, String...targetColumns) {
+		return countDistinct(Matches.one(column, value), targetColumns);
+	}
+	
+	/**
+	 * 查询符合条件的结果条数
+	 * @param matches	匹配条件，可为null
+	 * @param targetColumns	要做distinct count的字段，可以是"*"
+	 * @return
+	 * created by Tianxin on 2015年6月3日 下午8:52:01
+	 */
+	protected int countDistinct(Matches matches, String...targetColumns){
+		Query query = new QueryDistinctCount(configKeeper.table(), matches, targetColumns);
+		
 		String sql = query.getSQL();
 		Object[] params = query.getParams();
 		return countBySQL(sql, params);

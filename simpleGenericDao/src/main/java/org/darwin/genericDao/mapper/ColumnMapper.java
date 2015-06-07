@@ -4,18 +4,23 @@
  */
 package org.darwin.genericDao.mapper;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import org.darwin.genericDao.annotations.Column;
 import org.darwin.genericDao.annotations.enums.ColumnStyle;
 import org.darwin.genericDao.annotations.stat.StatType;
+import org.darwin.genericDao.mapper.jdbc.FetcherCache;
+import org.darwin.genericDao.mapper.jdbc.TypeFetcher;
 
 /**
  * 数据表中某一列的映射规则
  * created by Tianxin on 2015年5月27日 下午7:50:10
  */
 public class ColumnMapper {
-	
+
 	//私有化构造函数
 	private ColumnMapper() {
 	}
@@ -26,8 +31,8 @@ public class ColumnMapper {
 	 * @param getter
 	 * @param setter
 	 */
-	public ColumnMapper(Method getter, Method setter, Column annotation, ColumnStyle columnStyle) {
-		this(getter, setter, annotation, columnStyle, null);
+	public ColumnMapper(Method getter, Method setter, Class<?> fieldType, Column annotation, ColumnStyle columnStyle) {
+		this(getter, setter, fieldType, annotation, columnStyle, null);
 	}
 	
 	/**
@@ -36,13 +41,14 @@ public class ColumnMapper {
 	 * @param getter
 	 * @param setter
 	 */
-	public ColumnMapper(Method getter, Method setter, Column annotation, ColumnStyle columnStyle, StatType type) {
+	public ColumnMapper(Method getter, Method setter, Class<?> fieldType, Column annotation, ColumnStyle columnStyle, StatType type) {
 		this();
 		this.type = type;
 		this.getter = getter;
 		this.setter = setter;
-		this.annotation = annotation;
+		this.fetcher = FetcherCache.getFetcher(fieldType);
 		
+		this.annotation = annotation;
 		if(annotation != null){
 			this.sqlColumn = annotation.value();
 		}else{
@@ -51,7 +57,6 @@ public class ColumnMapper {
 			this.sqlColumn = columnStyle.convert(fieldName);
 		}
 	}
-
 
 	/**
 	 * 推导field名字
@@ -67,12 +72,17 @@ public class ColumnMapper {
 	}
 
 	/**
-	 * 这个字段映射里锁对应的annotation
+	 * 实体中反射的信息
+	 */
+	private Method getter;
+	private Method setter;
+	private TypeFetcher fetcher;
+	
+	/**
+	 * 数据库中的字段信息
 	 */
 	private Column annotation;
 	private String sqlColumn;
-	private Method getter;
-	private Method setter;
 	private StatType type;
 	
 	/**
@@ -92,6 +102,23 @@ public class ColumnMapper {
 	public String getColumn() {
 		int index = sqlColumn.lastIndexOf(' ');
 		return index == -1 ? sqlColumn : sqlColumn.substring(index + 1);
+	}
+	
+	/**
+	 * 将rs中此列的值，加载到目标对象中去
+	 * @param rs
+	 * @param target
+	 * created by Tianxin on 2015年6月5日 下午1:44:41
+	 * @throws SQLException 
+	 * @throws InvocationTargetException 
+	 * @throws IllegalArgumentException 
+	 * @throws IllegalAccessException 
+	 */
+	public void loadColumn2Field(ResultSet rs, Object target) throws SQLException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+		Object value = fetcher.getFromResultSet(rs, getColumn());
+		if(value != null){
+			setter.invoke(target, value);
+		}
 	}
 	
 	public Method getGetter() {

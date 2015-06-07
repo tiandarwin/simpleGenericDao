@@ -2,7 +2,7 @@
  * org.darwin.genericDao.mapper.TableGenerator.java
  * created by Tianxin(tianjige@163.com) on 2015年5月27日 下午7:57:31
  */
-package org.darwin.genericDao.mapper;
+package org.darwin.genericDao.dao.impl;
 
 import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.annotations.Sequence;

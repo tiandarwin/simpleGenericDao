@@ -2,7 +2,7 @@
  * org.darwin.genericDao.query.QueryHandler.java
  * created by Tianxin(tianjige@163.com) on 2015年5月27日 下午6:46:45
  */
-package org.darwin.genericDao.mapper;
+package org.darwin.genericDao.dao.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -11,14 +11,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.darwin.genericDao.bo.BaseObject;
+import org.darwin.genericDao.mapper.ColumnMapper;
 
 /**
  * created by Tianxin on 2015年5月27日 下午6:46:45
  */
-public class WriteSQLHandler<KEY extends Serializable, ENTITY extends BaseObject<KEY>> {
+public class QueryHandler<KEY extends Serializable, ENTITY extends BaseObject<KEY>> {
 	
 	//私有化无参构造器
-	private WriteSQLHandler() {
+	private QueryHandler() {
 	}
 
 
@@ -26,7 +27,7 @@ public class WriteSQLHandler<KEY extends Serializable, ENTITY extends BaseObject
 	 * @param columnMappers
 	 * @param configKeeper
 	 */
-	public WriteSQLHandler(Map<String, ColumnMapper> columnMappers, AnnotationConfigKeeper configKeeper) {
+	public QueryHandler(Map<String, ColumnMapper> columnMappers, AnnotationConfigKeeper configKeeper) {
 		
 		this();
 		this.tableGenerator = configKeeper;
@@ -39,10 +40,10 @@ public class WriteSQLHandler<KEY extends Serializable, ENTITY extends BaseObject
 		
 		Collection<ColumnMapper> mappers = columnMappers.values();
 		for(ColumnMapper mapper : mappers){
-			allColumns.add(mapper.getSQLColumn());
-			insertColumns.add(mapper.getSQLColumn());
+			allColumns.add(mapper.getColumn());
+			insertColumns.add(mapper.getColumn());
 			if(mapper.getAnnotation() == null || mapper.getAnnotation().modifiable()){
-				updateColumns.add(mapper.getSQLColumn());
+				updateColumns.add(mapper.getColumn());
 			}
 		}
 		

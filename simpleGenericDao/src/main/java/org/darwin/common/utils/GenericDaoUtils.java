@@ -220,8 +220,12 @@ public class GenericDaoUtils {
 				continue;
 			}
 
+			Class<?> fieldType = getter.getReturnType();
+			if(setter.getName().equals("setId")){
+				fieldType = getKeyClass(entityClass);
+			}
 			Column column = fetchColumn(field, getter, setter, entityClass);
-			ColumnMapper columnMapper = new ColumnMapper(getter, setter, column, columnStyle);
+			ColumnMapper columnMapper = new ColumnMapper(getter, setter, fieldType, column, columnStyle);
 			columnMappers.put(columnMapper.getColumn(), columnMapper);
 		}
 

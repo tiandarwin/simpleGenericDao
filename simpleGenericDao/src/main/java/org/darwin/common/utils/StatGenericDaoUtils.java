@@ -117,7 +117,7 @@ public class StatGenericDaoUtils {
 
 			Column column = GenericDaoUtils.fetchColumn(field, getter, setter, entityClass);
 			StatType type = fetchColumnType(field, getter, setter, entityClass);
-			ColumnMapper columnMapper = new ColumnMapper(getter, setter, column, columnStyle, type);
+			ColumnMapper columnMapper = new ColumnMapper(getter, setter, getter.getReturnType(), column, columnStyle, type);
 			columnMappers.put(columnMapper.getColumn(), columnMapper);
 		}
 

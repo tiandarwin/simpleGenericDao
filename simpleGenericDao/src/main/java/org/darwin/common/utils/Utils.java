@@ -256,4 +256,19 @@ public class Utils {
 	}
 
 
+	/**
+	 * 将对象列表转为对象数组
+	 * @param oList
+	 * @return
+	 * created by Tianxin on 2015年6月7日 下午2:11:04
+	 */
+	public static Object[] trans2Array(List<Object> oList) {
+		if(isEmpty(oList)){
+			return new Object[0];
+		}
+		
+		return oList.toArray(new Object[oList.size()]);
+	}
+
+
 }
