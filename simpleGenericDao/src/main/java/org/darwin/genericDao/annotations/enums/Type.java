@@ -9,5 +9,14 @@ package org.darwin.genericDao.annotations.enums;
  * created by Tianxin on 2015年6月3日 下午1:55:45
  */
 public enum Type {
-	SUM,AVG,KEY,DATE,EXTEND
+	SUM(1),AVG(2),KEY(3),DATE(4),EXTEND(5);
+	
+	private int value = 1;
+	private Type(int value) {
+		this.value = value;
+	}
+	public int value(){
+		return this.value;
+	}
+	
 }

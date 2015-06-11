@@ -6,13 +6,11 @@ package org.darwin.genericDao.dao;
 
 import java.util.List;
 
-import org.darwin.genericDao.bo.BaseStatObject;
-
 /**
  * 统计SQL的DAO
  * created by Tianxin on 2015年5月28日 下午11:20:23
  */
-public interface BaseStatDao<ENTITY extends BaseStatObject> {
+public interface BaseStatDao<ENTITY> {
 
 	/**
 	 * 查询出全部的结果

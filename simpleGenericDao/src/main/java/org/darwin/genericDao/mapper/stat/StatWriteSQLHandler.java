@@ -10,13 +10,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.darwin.genericDao.annotations.enums.Type;
-import org.darwin.genericDao.bo.BaseStatObject;
 import org.darwin.genericDao.mapper.ColumnMapper;
 
 /**
  * created by Tianxin on 2015年6月4日 下午3:01:44
  */
-public class StatWriteSQLHandler<ENTITY extends BaseStatObject> {
+public class StatWriteSQLHandler<ENTITY> {
 
 	
 	//私有化无参构造器

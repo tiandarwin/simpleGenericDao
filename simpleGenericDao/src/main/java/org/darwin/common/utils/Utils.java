@@ -62,6 +62,23 @@ public class Utils {
 	}
 	
 	/**
+	 * 生成一个新的set，按加载因子计算一个合适的长度
+	 * @param size
+	 * @return
+	 * created by Tianxin on 2015年6月4日 下午2:05:37
+	 */
+	public final static <K> Set<K> newSet(K...ks){
+	  if(ks == null || ks.length == 0){
+	    return new HashSet<K>(0);
+	  }
+	  Set<K> kSet = new HashSet<K>((ks.length * 4 + 2 )/ 3);
+	  for(K k : ks){
+	    kSet.add(k);
+	  }
+	  return kSet;
+	}
+	
+	/**
 	 * 判断一个集合是否为空
 	 * @param cs
 	 * @return

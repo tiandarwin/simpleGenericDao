@@ -82,6 +82,7 @@ public class BasicMappers {
 		final TypeFetcher fetcher = FetcherCache.getFetcher(rClass);
 		return new RowMapper<R>() {
 
+			@SuppressWarnings("unchecked")
 			public R mapRow(ResultSet rs, int rowNum) throws SQLException {
 				return (R)(fetcher.getFromResultSet(rs, 1));
 			}

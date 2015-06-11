@@ -7,6 +7,7 @@ package org.darwin.genericDao.query;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.operate.Groups;
 import org.darwin.genericDao.operate.Matches;
 import org.darwin.genericDao.operate.Orders;
@@ -58,7 +59,7 @@ public class QueryStat implements Query {
 		StringBuilder sb = new StringBuilder(512);
 		
 		//如果没有groupBy就没有必要做sum或者avg
-		if (groups.isEmpty()) {
+		if (groups.isEmpty() && !Utils.isEmpty(keyColumns)) {
 			for (String sumColumn : sumColumns) {
 				sb.append(sumColumn).append(',');
 			}

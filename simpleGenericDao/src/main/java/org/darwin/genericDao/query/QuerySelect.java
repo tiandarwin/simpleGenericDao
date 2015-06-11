@@ -4,6 +4,7 @@
  */
 package org.darwin.genericDao.query;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.darwin.genericDao.operate.Matches;
@@ -25,7 +26,7 @@ public class QuerySelect implements Query{
 	 * @param orders
 	 * @param table
 	 */
-	public QuerySelect(List<String> columns, Matches matches, Orders orders,
+	public QuerySelect(Collection<String> columns, Matches matches, Orders orders,
 			String table) {
 		this();
 		this.columns = columns;
@@ -42,13 +43,13 @@ public class QuerySelect implements Query{
 	 * @param offset
 	 * @param rows
 	 */
-	public QuerySelect(List<String> columns, Matches matches, Orders orders,
+	public QuerySelect(Collection<String> columns, Matches matches, Orders orders,
 			String table, int offset, int rows) {
 		this(columns, matches, orders, table);
 		this.offset = offset;
 		this.rows = rows;
 	}
-	private List<String> columns;
+	private Collection<String> columns;
 	private Matches matches;
 	private Orders orders;
 	private String table;
@@ -80,7 +81,7 @@ public class QuerySelect implements Query{
 		}
 	}
 	
-	public List<String> getColumns(){
+	public Collection<String> getColumns(){
 		return columns;
 	}
 	
