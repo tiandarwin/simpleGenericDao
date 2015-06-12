@@ -11,6 +11,8 @@ import java.util.List;
  * created by Tianxin on 2015年5月28日 下午11:20:23
  */
 public interface BaseStatDao<ENTITY> {
+  
+  List<ENTITY> findAll();
 
 	/**
 	 * 查询出全部的结果

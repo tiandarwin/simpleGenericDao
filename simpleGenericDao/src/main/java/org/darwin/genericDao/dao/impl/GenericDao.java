@@ -38,6 +38,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 /**
+ * 通用的带有主键的DAO
  * created by Tianxin on 2015年5月26日 下午9:20:41
  */
 public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>> implements BaseDao<KEY, ENTITY> {
@@ -70,7 +71,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 
   private Class<KEY> keyClass;
   private Class<ENTITY> entityClass;
-  private JdbcTemplate jdbcTemplate;
+  protected JdbcTemplate jdbcTemplate;
   private AnnotationConfigKeeper configKeeper;
   private WriteSQLHandler<KEY, ENTITY> queryHandler;
   private Map<String, ColumnMapper> columnMappers;

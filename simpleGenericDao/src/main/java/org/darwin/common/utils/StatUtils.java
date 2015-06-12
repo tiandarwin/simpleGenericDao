@@ -56,9 +56,9 @@ public class StatUtils {
 	 * created by Tianxin on 2015年6月4日 下午4:45:49
 	 */
 	public final static Date getDateFromInt(int yyyyMMdd){
-		Calendar calender = new GregorianCalendar();
-		calender.set(yyyyMMdd / 10000, yyyyMMdd % 10000 / 100, yyyyMMdd % 100);
-		return calender.getTime();
+		Calendar calendar = new GregorianCalendar();
+		calendar.set(yyyyMMdd / 10000, yyyyMMdd % 10000 / 100 - 1, yyyyMMdd % 100, 0, 0, 0);
+		return calendar.getTime();
 	}
 
 	/**

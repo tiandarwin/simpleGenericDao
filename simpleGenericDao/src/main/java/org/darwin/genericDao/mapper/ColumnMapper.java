@@ -31,16 +31,6 @@ public class ColumnMapper {
 	 * @param getter
 	 * @param setter
 	 */
-	public ColumnMapper(Method getter, Method setter, Class<?> fieldType, Column annotation, ColumnStyle columnStyle) {
-		this(getter, setter, fieldType, annotation, columnStyle, null);
-	}
-	
-	/**
-	 * 映射规则
-	 * @param sqlColumn
-	 * @param getter
-	 * @param setter
-	 */
 	public ColumnMapper(Method getter, Method setter, Class<?> fieldType, Column annotation, ColumnStyle columnStyle, StatType type) {
 		this();
 		this.type = type;
@@ -115,10 +105,17 @@ public class ColumnMapper {
 	 * @throws IllegalAccessException 
 	 */
 	public void loadColumn2Field(ResultSet rs, Object target) throws SQLException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+	  try{
 		Object value = fetcher.getFromResultSet(rs, getColumn());
 		if(value != null){
 			setter.invoke(target, value);
 		}
+	  }catch(Exception e){
+	    e.printStackTrace();
+	    rs.getTimestamp(getColumn());
+	    rs.getDate(getColumn());
+	    rs.getTime(getColumn());
+	  }
 	}
 	
 	public Method getGetter() {

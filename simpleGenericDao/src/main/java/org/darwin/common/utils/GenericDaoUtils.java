@@ -251,8 +251,7 @@ public class GenericDaoUtils {
    * @param entityClass
    * @return created by Tianxin on 2015年6月1日 上午10:26:05
    */
-  public static <KEY extends Serializable, ENTITY> Map<String, ColumnMapper> generateColumnMappers(Class<ENTITY> entityClass,
-      ColumnStyle columnStyle) {
+  public static <KEY extends Serializable, ENTITY> Map<String, ColumnMapper> generateColumnMappers(Class<ENTITY> entityClass, ColumnStyle columnStyle) {
 
     // 获取get方法、set方法、属性的列表
     List<Field> fields = getAllFields(entityClass);
@@ -286,19 +285,19 @@ public class GenericDaoUtils {
         fieldType = getGenericEntityClass(entityClass, BaseObject.class, 0);
       }
       Column column = fetchColumn(field, getter, setter, entityClass);
-      ColumnMapper columnMapper = new ColumnMapper(getter, setter, fieldType, column, columnStyle);
+      StatType type = fetchColumnType(field, getter, setter, entityClass);
+      ColumnMapper columnMapper = new ColumnMapper(getter, setter, fieldType, column, columnStyle, type);
       columnMappers.put(columnMapper.getColumn(), columnMapper);
     }
 
     // 注册到BasicMapper中
     Class<KEY> keyClass = null;
-    if(BaseObject.class.isAssignableFrom(entityClass)){
+    if (BaseObject.class.isAssignableFrom(entityClass)) {
       keyClass = getGenericEntityClass(entityClass, BaseObject.class, 0);
     }
     BasicMappers.register(keyClass, entityClass, columnMappers);
     return columnMappers;
   }
-
 
   /**
    * 从field、getter、setter中获取annotation。如果不存在，则向上回溯获取。
