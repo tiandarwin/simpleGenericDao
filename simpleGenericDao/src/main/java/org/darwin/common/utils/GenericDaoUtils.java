@@ -190,23 +190,49 @@ public class GenericDaoUtils {
     String sColumns = sql.substring(start, end).trim();
 
     // 解析字段列表部分
-    String[] columns = sColumns.split(",");
-    List<String> columnList = new ArrayList<String>(columns.length);
-    for (String column : columns) {
-      column = column.trim();
+    List<String> columns = splitColumns(sColumns);
+    List<String> labels = new ArrayList<String>(columns.size());
+    for(String column : columns){
       int index = column.lastIndexOf(' ');
-
-      // 以空格处理别名的
-      if (index > 0) {
-        columnList.add(column.substring(index + 1).trim());
-        continue;
+      if(index == -1){
+        labels.add(column);
+      }else{
+        labels.add(column.substring(index + 1));
       }
-
-      // 无别名的
-      columnList.add(column);
     }
+    return labels;
+  }
 
-    return columnList;
+  /**
+   * @param sColumns
+   * @return
+   * created by Tianxin on 2015年6月15日 下午8:15:54
+   */
+  private static List<String> splitColumns(String sColumns) {
+    List<String> columns = new ArrayList<String>();
+    sColumns = sColumns + ",";
+    int leftBracketCount = 0;
+    int start = 0;
+    for(int i = 0 ; i < sColumns.length() ; i ++){
+      char c = sColumns.charAt(i);
+      if(c == '('){
+        leftBracketCount += 1;
+      }else if(c == ')'){
+        leftBracketCount -= 1;
+      }else if(c == ','){
+        if(leftBracketCount == 0){
+          columns.add(sColumns.substring(start, i));
+          start = i + 1;
+        }
+      }
+    }
+    return columns;
+  }
+  
+  public static void main(String[] args) {
+    String sql = "select sum(show_num) as show_num,sum(consume) as consume,sum(click_num) as click_num,round(sum(consume) / 100 / sum(show_num) * 1000, 2) as cpm,round(sum(consume) / 100 / sum(click_num), 2) as acp,round(sum(click_num) / sum(show_num), 4) as ctr,consumer_id,industry3,industry2,industry1,date from consumer_stat where consumer_id in (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) and date between ? and ? group by date order by date desc";
+    List<String> labels = getColumnsFromSQL(sql);
+    System.out.println(labels);
   }
 
   /**

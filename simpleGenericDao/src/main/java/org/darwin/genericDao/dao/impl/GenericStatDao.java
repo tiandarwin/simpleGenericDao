@@ -29,12 +29,20 @@ import org.darwin.genericDao.query.Query;
 import org.darwin.genericDao.query.QueryDistinctCount;
 import org.darwin.genericDao.query.QuerySelect;
 import org.darwin.genericDao.query.QueryStat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * 统计表的默认DAO实现 created by Tianxin on 2015年6月3日 下午2:05:00
+ * 统计表的默认DAO实现
+ * created by Tianxin on 2015年6月3日 下午2:05:00
  */
 public class GenericStatDao<ENTITY> {
+
+  /**
+   * static slf4j logger instance
+   */
+  protected final static Logger LOG = LoggerFactory.getLogger(GenericStatDao.class);
 
   /**
    * 无参构造函数
@@ -76,27 +84,19 @@ public class GenericStatDao<ENTITY> {
         continue;
       }
 
-      // 根据统计类型放到不同的地方
+      // 根据统计类型放到不同的地方，这里使用switch，编译后会出现内部类，导致一些莫名的错误，暂时使用ifelse
       Type type = mapper.getType().value();
-      switch (type) {
-        case KEY:
-          keyColumns.add(mapper.getSQLColumn());
-          break;
-        case SUM:
-          sumColumns.add(mapper.getSQLColumn());
-          break;
-        case AVG:
-          avgColumns.add(mapper.getSQLColumn());
-          break;
-        case EXTEND:
-          extendColumns.add(mapper.getSQLColumn());
-          break;
-        case DATE:
-          dateColumn = mapper.getSQLColumn();
-          keyColumns.add(dateColumn);
-          break;
-        default:
-          break;
+      if(Type.KEY == type){
+        keyColumns.add(mapper.getSQLColumn());
+      }else if(Type.SUM == type){
+        sumColumns.add(mapper.getSQLColumn());
+      }else if(Type.AVG == type){
+        avgColumns.add(mapper.getSQLColumn());
+      }else if(Type.EXTEND == type){
+        extendColumns.add(mapper.getSQLColumn());
+      }else if(Type.DATE == type){
+        dateColumn = mapper.getSQLColumn();
+        keyColumns.add(dateColumn);
       }
     }
   }
@@ -127,6 +127,24 @@ public class GenericStatDao<ENTITY> {
   public List<ENTITY> statAll(boolean aggregationByDate) {
     Groups groups = aggregationByDate ? generateAggergationByDateGroups() : Groups.init();
     return statByMgo(null, groups, null);
+  }
+  
+  /**
+   * 根据匹配条件，分组规则，排序规则进行统计
+   * 
+   * @param matches
+   * @param groups
+   * @param orders
+   * @return created by Tianxin on 2015年6月4日 下午8:23:27
+   */
+  public ENTITY statByMatches(Matches matches) {
+    List<ENTITY> entities = statByMgo(matches, null, null);
+    
+    if(Utils.isEmpty(entities)){
+      return null;
+    }
+    
+    return entities.get(0);
   }
 
   /**
@@ -177,7 +195,7 @@ public class GenericStatDao<ENTITY> {
   protected List<ENTITY> statByQuery(QueryStat query) {
     String sql = query.getSQL();
     Object[] params = query.getParams();
-    List<String> columns = query.getColumns();
+    List<String> columns = GenericDaoUtils.getColumnsFromSQL(sql);
     return jdbcTemplate.query(sql, params, new EntityMapper(columns, columnMappers, entityClass));
   }
 

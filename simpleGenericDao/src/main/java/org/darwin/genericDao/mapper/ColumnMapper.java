@@ -37,6 +37,7 @@ public class ColumnMapper {
 		this.getter = getter;
 		this.setter = setter;
 		this.fetcher = FetcherCache.getFetcher(fieldType);
+		this.fieldType = getter.getReturnType();
 		
 		this.annotation = annotation;
 		if(annotation != null){
@@ -67,6 +68,7 @@ public class ColumnMapper {
 	private Method getter;
 	private Method setter;
 	private TypeFetcher fetcher;
+	private Class<?> fieldType;
 	
 	/**
 	 * 数据库中的字段信息
@@ -107,14 +109,11 @@ public class ColumnMapper {
 	public void loadColumn2Field(ResultSet rs, Object target) throws SQLException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
 	  try{
 		Object value = fetcher.getFromResultSet(rs, getColumn());
-		if(value != null){
+		if(value != null || !fieldType.isPrimitive()){
 			setter.invoke(target, value);
 		}
 	  }catch(Exception e){
 	    e.printStackTrace();
-	    rs.getTimestamp(getColumn());
-	    rs.getDate(getColumn());
-	    rs.getTime(getColumn());
 	  }
 	}
 	

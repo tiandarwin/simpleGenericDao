@@ -18,6 +18,17 @@ public class Modifies implements Operate {
 	public static Modifies init() {
 		return new Modifies();
 	}
+	
+	/**
+	 * 初始化一个修改动作对象
+	 * @param column
+	 * @param value
+	 * @return
+	 * created by Tianxin on 2015年6月15日 下午2:29:00
+	 */
+	public static Modifies one(String column, Object value){
+	  return new Modifies().modify(column, value);
+	}
 
 	private Modifies() {
 	}
