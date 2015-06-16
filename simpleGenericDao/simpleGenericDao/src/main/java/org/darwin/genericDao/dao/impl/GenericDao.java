@@ -31,6 +31,8 @@ import org.darwin.genericDao.query.QueryDelete;
 import org.darwin.genericDao.query.QueryDistinctCount;
 import org.darwin.genericDao.query.QueryModify;
 import org.darwin.genericDao.query.QuerySelect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -42,6 +44,11 @@ import org.springframework.jdbc.support.KeyHolder;
  * created by Tianxin on 2015年5月26日 下午9:20:41
  */
 public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>> implements BaseDao<KEY, ENTITY> {
+  
+  /**
+   * static slf4j logger instance
+   */
+  protected final static Logger LOG = LoggerFactory.getLogger(GenericDao.class);
 
   /**
    * 构造函数，在这里对最主要的几个属性进行初始化
@@ -107,11 +114,13 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 
     // 如果id不为null，则直接插入即可
     if (entity.getId() != null) {
+      LOG.info(Utils.toLogSQL(sql, params));
       return jdbcTemplate.update(sql, params) >= 1;
     }
 
     // ID为null时，执行插入操作同时要获取插入的key
     KeyHolder keyHolder = new GeneratedKeyHolder();
+    LOG.info(sql);
     int rowCount = this.jdbcTemplate.update(new PreparedStatementCreator() {
       public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
         PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -164,7 +173,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
 
     // 只是将insert替换成replace就变成了replace的SQL语句
     sql = sql.replaceFirst("insert", "replace");
-
+    LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.update(sql, params);
   }
 
@@ -228,6 +237,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     QueryDelete query = new QueryDelete(matches, queryHandler.table());
     String sql = query.getSQL();
     Object[] params = query.getParams();
+    LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.update(sql, params);
   }
 
@@ -237,7 +247,8 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     }
     String sql = queryHandler.generateUpdateSQL(entity);
     Object[] params = queryHandler.generateUpdateParams(entity);
-
+    
+    LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.update(sql, params) >= 1;
   }
 
@@ -250,6 +261,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     }
 
     String sql = queryHandler.generateUpdateSQL(list.get(0));
+    LOG.info(sql);
     int[] results = jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
 
       public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -284,6 +296,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     QueryModify modify = new QueryModify(modifies, matches, configKeeper.table());
     String sql = modify.getSQL();
     Object[] args = modify.getParams();
+    LOG.info(Utils.toLogSQL(sql, args));
     return jdbcTemplate.update(sql, args);
   }
 
@@ -432,6 +445,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     QuerySelect query = new QuerySelect(choozenColumns, matches, orders, configKeeper.table(), offset, rows);
     String sql = query.getSQL();
     Object[] params = query.getParams();
+    LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.query(sql, params, new EntityMapper<ENTITY>(choozenColumns, columnMappers, entityClass));
   }
 
@@ -462,6 +476,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     QuerySelect query = new QuerySelect(columns, matches, null, configKeeper.table(), offset, rows);
     String sql = query.getSQL();
     Object[] params = query.getParams();
+    LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.query(sql, params, BasicMappers.getMapper(rClass));
   }
 
@@ -474,6 +489,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
    * @return created by Tianxin on 2015年6月3日 下午8:50:26
    */
   protected <E extends BaseObject<?>> List<E> findBySQL(Class<E> eClass, String sql, Object... params) {
+    LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.query(sql, params, BasicMappers.getEntityMapper(eClass, sql));
   }
 
@@ -545,6 +561,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
    */
   @SuppressWarnings("deprecation")
   protected int countBySQL(String sql, Object[] params) {
+    LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.queryForInt(sql, params);
   }
 
