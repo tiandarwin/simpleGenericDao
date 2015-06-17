@@ -147,6 +147,34 @@ public class GenericStatDao<ENTITY> {
 
     return entities.get(0);
   }
+  
+  /**
+   * 根据匹配条件，分组规则，排序规则进行统计
+   * 
+   * @param matches
+   * @param groups
+   * @param orders
+   * @return created by Tianxin on 2015年6月4日 下午8:23:27
+   */
+  public <R> List<R> statOneColumnByMgo(Matches matches, Groups groups, Orders orders, String column, Class<R> rClass) {
+    return statPageOneColumnByMgo(matches, groups, orders, column, rClass, 0, 0);
+  }
+  
+  /**
+   * 根据匹配条件，分组规则，排序规则进行统计
+   * 
+   * @param matches
+   * @param groups
+   * @param orders
+   * @return created by Tianxin on 2015年6月4日 下午8:23:27
+   */
+  public <R> List<R> statPageOneColumnByMgo(Matches matches, Groups groups, Orders orders, String column, Class<R> rClass, int offset, int rows) {
+    QueryStat query = new QueryStat(new ArrayList<String>(0), new ArrayList<String>(0), Arrays.asList(column) , new ArrayList<String>(0), matches, orders, groups, configKeeper.table(), offset, rows);
+    String sql = query.getSQL();
+    Object[] params = query.getParams();
+    LOG.info(Utils.toLogSQL(sql, params));
+    return jdbcTemplate.query(sql, params, BasicMappers.getMapper(rClass));
+  }
 
   /**
    * 根据匹配条件，分组规则，排序规则进行统计
@@ -433,8 +461,9 @@ public class GenericStatDao<ENTITY> {
     QuerySelect query = new QuerySelect(choozenColumns, matches, orders, configKeeper.table(), offset, rows);
     String sql = query.getSQL();
     Object[] params = query.getParams();
+    List<String> columnList = GenericDaoUtils.getColumnsFromSQL(sql);
     LOG.info(Utils.toLogSQL(sql, params));
-    return jdbcTemplate.query(sql, params, new EntityMapper(choozenColumns, columnMappers, entityClass));
+    return jdbcTemplate.query(sql, params, new EntityMapper(columnList, columnMappers, entityClass));
   }
 
   /**

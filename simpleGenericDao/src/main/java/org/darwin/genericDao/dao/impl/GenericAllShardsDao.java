@@ -216,7 +216,8 @@ public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseOb
     String sql = query.getSQL();
     Object[] args = query.getParams();
     LOG.info(Utils.toLogSQL(sql, args));
-    List<ENTITY> entities = jdbcTemplate.query(sql, args, new EntityMapper<ENTITY>(choozenColumns, columnMappers, entityClass));
+    List<String> columnList = GenericDaoUtils.getColumnsFromSQL(sql);
+    List<ENTITY> entities = jdbcTemplate.query(sql, args, new EntityMapper<ENTITY>(columnList, columnMappers, entityClass));
     Collections.sort(entities, new GenericComparator<ENTITY>(orders, columnMappers));
     return entities;
   }
