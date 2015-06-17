@@ -230,21 +230,7 @@ public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseOb
    * @return created by Tianxin on 2015年6月3日 下午8:47:59
    */
   protected <R extends Serializable> List<R> findOneColumn(Class<R> rClass, Matches matches, String column) {
-    return pageOneColumn(rClass, matches, column, 0, 0);
-  }
-
-  /**
-   * 分页查询某一列
-   * 
-   * @param rClass 结果类型
-   * @param matches 匹配条件
-   * @param column 字段名
-   * @param offset 起始位置
-   * @param rows 获取条数
-   * @return created by Tianxin on 2015年6月3日 下午8:48:26
-   */
-  protected <R extends Serializable> List<R> pageOneColumn(Class<R> rClass, Matches matches, String column, int offset, int rows) {
-    return pageOneColumn(rClass, matches, null, column, offset, rows);
+    return pageOneColumn(rClass, matches, null, column, 0, 0);
   }
 
   /**

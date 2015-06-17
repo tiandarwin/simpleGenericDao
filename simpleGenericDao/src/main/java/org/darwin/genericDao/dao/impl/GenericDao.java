@@ -458,7 +458,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
    * @return created by Tianxin on 2015年6月3日 下午8:47:59
    */
   protected <R extends Serializable> List<R> findOneColumn(Class<R> rClass, Matches matches, String column) {
-    return pageOneColumn(rClass, matches, column, 0, 0);
+    return pageOneColumn(rClass, matches, null, column, 0, 0);
   }
 
   /**
@@ -471,9 +471,9 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
    * @param rows 获取条数
    * @return created by Tianxin on 2015年6月3日 下午8:48:26
    */
-  protected <R extends Serializable> List<R> pageOneColumn(Class<R> rClass, Matches matches, String column, int offset, int rows) {
+  protected <R extends Serializable> List<R> pageOneColumn(Class<R> rClass, Matches matches, Orders orders, String column, int offset, int rows) {
     List<String> columns = Arrays.asList(column);
-    QuerySelect query = new QuerySelect(columns, matches, null, configKeeper.table(), offset, rows);
+    QuerySelect query = new QuerySelect(columns, matches, orders, configKeeper.table(), offset, rows);
     String sql = query.getSQL();
     Object[] params = query.getParams();
     LOG.info(Utils.toLogSQL(sql, params));
