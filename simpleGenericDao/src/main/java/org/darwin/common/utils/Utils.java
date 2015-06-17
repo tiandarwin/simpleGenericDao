@@ -299,7 +299,7 @@ public class Utils {
    * @return
    * created by Tianxin on 2015年6月7日 下午2:11:04
    */
-  public static Object[] trans2Array(List<Object> oList) {
+  public static Object[] trans2Array(Collection<?> oList) {
     if (isEmpty(oList)) {
       return new Object[0];
     }

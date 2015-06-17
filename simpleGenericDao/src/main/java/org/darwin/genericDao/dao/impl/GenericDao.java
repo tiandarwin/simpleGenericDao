@@ -488,7 +488,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
    * @param params 参数
    * @return created by Tianxin on 2015年6月3日 下午8:50:26
    */
-  protected <E extends BaseObject<?>> List<E> findBySQL(Class<E> eClass, String sql, Object... params) {
+  protected <E> List<E> findBySQL(Class<E> eClass, String sql, Object... params) {
     LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.query(sql, params, BasicMappers.getEntityMapper(eClass, sql));
   }

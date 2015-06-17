@@ -4,7 +4,6 @@
  */
 package org.darwin.common.utils;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -270,6 +269,31 @@ public class GenericDaoUtils {
       return sequence;
     }
   }
+  
+  /**
+   * 获取实体的columnStyle
+   * @param entityClass
+   * @return
+   * created by Tianxin on 2015年6月17日 下午8:17:13
+   */
+  private static <ENTITY> ColumnStyle getColumnStyleFromClass(Class<ENTITY> entityClass){
+    
+    //找table标签
+    Table table = entityClass.getAnnotation(Table.class);
+    if(table != null){
+      return table.columnStyle();
+    }
+    
+    //找StatTable标签s
+    StatTable sTable = entityClass.getAnnotation(StatTable.class);
+    if(sTable != null){
+      return sTable.columnStyle();
+    }
+    
+    //没有任何标签的，默认按照驼峰到mysql的转
+    return ColumnStyle.JAVA_TO_MYSQL;
+  }
+  
 
   /**
    * 获取entityClass中与DB的所有字段映射关系
@@ -277,7 +301,11 @@ public class GenericDaoUtils {
    * @param entityClass
    * @return created by Tianxin on 2015年6月1日 上午10:26:05
    */
-  public static <KEY extends Serializable, ENTITY> Map<String, ColumnMapper> generateColumnMappers(Class<ENTITY> entityClass, ColumnStyle columnStyle) {
+  public static <ENTITY> Map<String, ColumnMapper> generateColumnMappers(Class<ENTITY> entityClass, ColumnStyle columnStyle) {
+    
+    if(columnStyle == null){
+      columnStyle = getColumnStyleFromClass(entityClass);
+    }
 
     // 获取get方法、set方法、属性的列表
     List<Field> fields = getAllFields(entityClass);
@@ -317,7 +345,7 @@ public class GenericDaoUtils {
     }
 
     // 注册到BasicMapper中
-    Class<KEY> keyClass = null;
+    Class<?> keyClass = null;
     if (BaseObject.class.isAssignableFrom(entityClass)) {
       keyClass = getGenericEntityClass(entityClass, BaseObject.class, 0);
     }
