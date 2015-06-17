@@ -31,8 +31,6 @@
 		</repository>
 	</distributionManagement>
 
-	<!-- Core utilities used by other modules. Define this if you use Spring 
-		Utility APIs (org.springframework.core.*/org.springframework.util.*) -->
 	<dependencies>
 
 		<dependency>
