@@ -66,6 +66,7 @@ public class GenericStatDao<ENTITY> {
   public int create(List<ENTITY> entities) {
     String sql = writeHandler.generateInsertSQL(entities);
     Object[] args = writeHandler.generateInsertParams(entities);
+    LOG.info(Utils.toLogSQL(sql, args));
     return jdbcTemplate.update(sql, args);
   }
 
@@ -86,15 +87,15 @@ public class GenericStatDao<ENTITY> {
 
       // 根据统计类型放到不同的地方，这里使用switch，编译后会出现内部类，导致一些莫名的错误，暂时使用ifelse
       Type type = mapper.getType().value();
-      if(Type.KEY == type){
+      if (Type.KEY == type) {
         keyColumns.add(mapper.getSQLColumn());
-      }else if(Type.SUM == type){
+      } else if (Type.SUM == type) {
         sumColumns.add(mapper.getSQLColumn());
-      }else if(Type.AVG == type){
+      } else if (Type.AVG == type) {
         avgColumns.add(mapper.getSQLColumn());
-      }else if(Type.EXTEND == type){
+      } else if (Type.EXTEND == type) {
         extendColumns.add(mapper.getSQLColumn());
-      }else if(Type.DATE == type){
+      } else if (Type.DATE == type) {
         dateColumn = mapper.getSQLColumn();
         keyColumns.add(dateColumn);
       }
@@ -128,7 +129,7 @@ public class GenericStatDao<ENTITY> {
     Groups groups = aggregationByDate ? generateAggergationByDateGroups() : Groups.init();
     return statByMgo(null, groups, null);
   }
-  
+
   /**
    * 根据匹配条件，分组规则，排序规则进行统计
    * 
@@ -139,11 +140,11 @@ public class GenericStatDao<ENTITY> {
    */
   public ENTITY statByMatches(Matches matches) {
     List<ENTITY> entities = statByMgo(matches, null, null);
-    
-    if(Utils.isEmpty(entities)){
+
+    if (Utils.isEmpty(entities)) {
       return null;
     }
-    
+
     return entities.get(0);
   }
 
@@ -196,6 +197,7 @@ public class GenericStatDao<ENTITY> {
     String sql = query.getSQL();
     Object[] params = query.getParams();
     List<String> columns = GenericDaoUtils.getColumnsFromSQL(sql);
+    LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.query(sql, params, new EntityMapper(columns, columnMappers, entityClass));
   }
 
@@ -298,6 +300,7 @@ public class GenericStatDao<ENTITY> {
    */
   @SuppressWarnings("deprecation")
   protected int countBySQL(String sql, Object[] params) {
+    LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.queryForInt(sql, params);
   }
 
@@ -430,6 +433,7 @@ public class GenericStatDao<ENTITY> {
     QuerySelect query = new QuerySelect(choozenColumns, matches, orders, configKeeper.table(), offset, rows);
     String sql = query.getSQL();
     Object[] params = query.getParams();
+    LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.query(sql, params, new EntityMapper(choozenColumns, columnMappers, entityClass));
   }
 
@@ -460,6 +464,7 @@ public class GenericStatDao<ENTITY> {
     QuerySelect query = new QuerySelect(columns, matches, null, configKeeper.table(), offset, rows);
     String sql = query.getSQL();
     Object[] params = query.getParams();
+    LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.query(sql, params, BasicMappers.getMapper(rClass));
   }
 
@@ -472,6 +477,7 @@ public class GenericStatDao<ENTITY> {
    * @return created by Tianxin on 2015年6月3日 下午8:50:26
    */
   protected <E extends BaseObject<?>> List<E> findBySQL(Class<E> eClass, String sql, Object... params) {
+    LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.query(sql, params, BasicMappers.getEntityMapper(eClass, sql));
   }
 }

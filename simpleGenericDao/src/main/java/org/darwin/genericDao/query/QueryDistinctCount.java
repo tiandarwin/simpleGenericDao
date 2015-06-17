@@ -36,7 +36,7 @@ public class QueryDistinctCount implements Query {
 		for(String column : targetColumns){
 			sb.append(column).append(',');
 		}
-		sb.setCharAt(sb.length(), ')');
+		sb.setCharAt(sb.length() - 1, ')');
 		sb.append(" from ").append(table);
 		
 		if (matches != null && !matches.isEmpty()) {

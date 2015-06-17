@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -363,5 +364,113 @@ public class Utils {
       }
     }
     return list;
+  }
+  
+  /**
+   * 构造日志中的SQL
+   * @param sql
+   * @param args
+   * @return
+   * created by Tianxin on 2015年6月16日 上午10:28:13
+   */
+  public final static String toLogSQL(String sql, Object...args){
+    
+    if(sql == null || sql.length() == 0){
+      return sql;
+    }
+    
+    if(args == null || args.length == 0){
+      return sql;
+    }
+    
+    int count = countChar(sql, '?');
+    if(count == args.length){
+      return putArgsIn2SQL(sql, args);
+    }else {
+      return putArgsAfterSQL(sql, args);
+    }
+  }
+
+
+  /**
+   * 将参数放到SQL的结尾。当问号与其参数个数不匹配时才会这样
+   * @param sql
+   * @param args
+   * @return
+   * created by Tianxin on 2015年6月16日 上午10:42:35
+   */
+  private static String putArgsAfterSQL(String sql, Object[] args) {
+    StringBuilder sb = new StringBuilder(sql.length() * 2);
+    sb.append(" with args [");
+    for(Object arg : args){
+      sb.append(getSQLParam(arg)).append(',');
+    }
+    sb.setCharAt(sb.length() - 1, ']');
+    return sb.toString();
+  }
+
+
+  /**
+   * 将参数放到sql中
+   * @param sql
+   * @param args
+   * @return
+   * created by Tianxin on 2015年6月16日 上午10:41:28
+   */
+  private static String putArgsIn2SQL(String sql, Object... args) {
+    StringBuilder sb = new StringBuilder(sql.length() * 2);
+    int argIndex = 0;
+    for(int i = 0 ; i < sql.length() ; i ++){
+      char c = sql.charAt(i);
+      if(c == '?'){
+        Object param = args[argIndex];
+        sb.append(getSQLParam(param));
+        argIndex += 1;
+      }else{
+        sb.append(c);
+      }
+    }
+    return sb.toString();
+  }
+
+
+  /**
+   * 看字符串中有多少个char出现
+   * @param s
+   * @param c
+   * @return
+   * created by Tianxin on 2015年6月16日 上午10:39:01
+   */
+  public static int countChar(String s, char c) {
+    if(isEmpty(s)){
+      return 0;
+    }
+    
+    int count = 0;
+    for (int i = 0; i < s.length(); i++) {
+      if(s.charAt(i) == c){
+        count += 1;
+      }
+    }
+    return count;
+  }
+
+
+  /**
+   * @param param
+   * @return
+   * created by Tianxin on 2015年6月16日 上午10:32:27
+   */
+  public static Object getSQLParam(Object param) {
+    if(param == null){
+      return "null";
+    }
+    if(param instanceof String){
+      return connect('\'', param, '\'');
+    }
+    if(param instanceof Date){
+      return connect('\'', StatUtils.getStringDate((Date)param), '\'');
+    }
+    return param;
   }
 }

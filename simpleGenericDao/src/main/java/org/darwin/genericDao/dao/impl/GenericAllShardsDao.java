@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.darwin.common.utils.GenericDaoUtils;
+import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.annotations.Sequence;
 import org.darwin.genericDao.annotations.Table;
 import org.darwin.genericDao.bo.BaseObject;
@@ -33,12 +34,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * 通用的扫描全多个数据库切片的DAO
  * created by Tianxin on 2015年6月15日 下午2:36:48
  */
-public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>> implements BaseAllShardsDao<KEY, ENTITY>  {
+public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>> implements BaseAllShardsDao<KEY, ENTITY> {
   /**
    * 默认生成的该类的LOG记录器，使用slf4j组件。避免产生编译警告，使用protected修饰符。
    */
   protected final static Logger LOG = LoggerFactory.getLogger(GenericAllShardsDao.class);
-  
+
   /**
    * 构造函数，在这里对最主要的几个属性进行初始化
    */
@@ -213,8 +214,9 @@ public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseOb
     List<String> choozenColumns = Arrays.asList(columns);
     QuerySelect query = new QuerySelect(choozenColumns, matches, orders, configKeeper.table(), offset, rows);
     String sql = query.getSQL();
-    Object[] params = query.getParams();
-    List<ENTITY> entities = jdbcTemplate.query(sql, params, new EntityMapper<ENTITY>(choozenColumns, columnMappers, entityClass));
+    Object[] args = query.getParams();
+    LOG.info(Utils.toLogSQL(sql, args));
+    List<ENTITY> entities = jdbcTemplate.query(sql, args, new EntityMapper<ENTITY>(choozenColumns, columnMappers, entityClass));
     Collections.sort(entities, new GenericComparator<ENTITY>(orders, columnMappers));
     return entities;
   }
@@ -244,7 +246,7 @@ public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseOb
   protected <R extends Serializable> List<R> pageOneColumn(Class<R> rClass, Matches matches, String column, int offset, int rows) {
     return pageOneColumn(rClass, matches, null, column, offset, rows);
   }
-  
+
   /**
    * 分页查询某一列
    * 
@@ -260,10 +262,11 @@ public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseOb
     QuerySelect query = new QuerySelect(columns, matches, orders, configKeeper.table(), offset, rows);
     String sql = query.getSQL();
     Object[] params = query.getParams();
+    LOG.info(Utils.toLogSQL(sql, params));
     List<R> entities = jdbcTemplate.query(sql, params, BasicMappers.getMapper(rClass));
     Collections.sort(entities, new GenericComparator<R>(orders, columnMappers));
     return entities;
-    
+
   }
 
   /**
@@ -275,6 +278,7 @@ public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseOb
    * @return created by Tianxin on 2015年6月3日 下午8:50:26
    */
   protected <E extends BaseObject<?>> List<E> findBySQL(Class<E> eClass, String sql, Object... params) {
+    LOG.info(Utils.toLogSQL(sql, params));
     List<E> entities = jdbcTemplate.query(sql, params, BasicMappers.getEntityMapper(eClass, sql));
     Collections.sort(entities, new GenericComparator<E>(sql, columnMappers));
     return entities;
@@ -348,6 +352,7 @@ public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseOb
    */
   @SuppressWarnings("deprecation")
   protected int countBySQL(String sql, Object[] params) {
+    LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.queryForInt(sql, params);
   }
 

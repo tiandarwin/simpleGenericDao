@@ -76,4 +76,18 @@ public class StatUtils {
 			throw new RuntimeException(e);
 		}
 	}
+
+  /**
+   * 返回标准的时间格式
+   * @param date
+   * @return
+   * created by Tianxin on 2015年6月16日 上午10:35:12
+   */
+  public static Object getStringDate(Date date) {
+    if(date == null){
+      return null;
+    }
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    return format.format(date);
+  }
 }
