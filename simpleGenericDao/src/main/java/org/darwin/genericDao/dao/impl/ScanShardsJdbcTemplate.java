@@ -63,6 +63,7 @@ public class ScanShardsJdbcTemplate extends JdbcTemplate {
   }
 
   private Integer getShardingKey() {
+    ThreadContext.ensuerInited();
     if (shardingKeyName == null) {
       return ThreadContext.getShardingKey();
     } else {
@@ -71,6 +72,7 @@ public class ScanShardsJdbcTemplate extends JdbcTemplate {
   }
 
   private void putShardingKey(Object key) {
+    ThreadContext.ensuerInited();
     if (shardingKeyName == null) {
       ThreadContext.putShardingKey(key);
     } else {
@@ -102,7 +104,10 @@ public class ScanShardsJdbcTemplate extends JdbcTemplate {
       List<T> list = new ArrayList<T>();
       for (Integer key : shardingKeys) {
         putShardingKey(key);
-        list.addAll(core.query(sql, args, rowMapper));
+        List<T> shardList = core.query(sql, args, rowMapper);
+        if(shardList != null){
+          list.addAll(shardList);
+        }
       }
       return list;
     } finally {

@@ -55,7 +55,14 @@ public class BasicMappers {
 	 * @return created by Tianxin on 2015年5月28日 下午5:56:17
 	 */
 	private static Map<String, ColumnMapper> getColumnMappers(Class<?> clazz) {
-		return columnMappersMap.get(clazz);
+	  Map<String, ColumnMapper> map = columnMappersMap.get(clazz);
+	  if(map != null){
+	    return map;
+	  }
+	  
+	  map = GenericDaoUtils.generateColumnMappers(clazz, null);
+	  columnMappersMap.put(clazz, map);
+	  return map;
 	}
 
 	/**

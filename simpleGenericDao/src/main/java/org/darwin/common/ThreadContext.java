@@ -12,6 +12,12 @@ import java.util.Map;
  * created by Tianxin on 2015年6月8日 上午10:30:23
  */
 public class ThreadContext {
+  
+  public static void ensuerInited(){
+    if(CTX.get() == null){
+      init();
+    }
+  }
 
   /**
    * 全局的线程上下文数据存储
@@ -57,7 +63,8 @@ public class ThreadContext {
    */
   @SuppressWarnings("unchecked")
   public final static <V> V get(String key) {
-    return (V) CTX.get().get(key);
+    Map<String, Object> map = CTX.get();
+    return map == null ? null : (V) CTX.get().get(key);
   }
 
   /**
