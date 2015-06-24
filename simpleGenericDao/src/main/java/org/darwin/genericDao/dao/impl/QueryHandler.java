@@ -27,7 +27,7 @@ public class QueryHandler<KEY extends Serializable, ENTITY extends BaseObject<KE
 	 * @param columnMappers
 	 * @param configKeeper
 	 */
-	public QueryHandler(Map<String, ColumnMapper> columnMappers, AnnotationConfigKeeper configKeeper) {
+	public QueryHandler(Map<String, ColumnMapper> columnMappers, TableConfigKeeper configKeeper) {
 		
 		this();
 		this.tableGenerator = configKeeper;
@@ -88,7 +88,7 @@ public class QueryHandler<KEY extends Serializable, ENTITY extends BaseObject<KE
 	private String sInsertColumns;
 
 	private Map<String, ColumnMapper> columnMappers;
-	private AnnotationConfigKeeper tableGenerator;
+	private TableConfigKeeper tableGenerator;
 
 	/**
 	 * @return created by Tianxin on 2015年5月27日 下午6:47:12

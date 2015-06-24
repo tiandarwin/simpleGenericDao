@@ -1,14 +1,12 @@
 /**
- * org.darwin.genericDao.dao.impl.GenericAllShardsDao.java
- * created by Tianxin(tianjige@163.com) on 2015年6月15日 下午2:36:48
+ * org.darwin.genericDao.dao.impl.AbstractGenericDao.java
+ * created by Tianxin(tianjige@163.com) on 2015年6月24日 下午5:33:04
  */
 package org.darwin.genericDao.dao.impl;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -16,46 +14,53 @@ import org.darwin.common.utils.GenericDaoUtils;
 import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.annotations.Sequence;
 import org.darwin.genericDao.annotations.Table;
-import org.darwin.genericDao.bo.BaseObject;
-import org.darwin.genericDao.dao.BaseAllShardsDao;
 import org.darwin.genericDao.mapper.BasicMappers;
 import org.darwin.genericDao.mapper.ColumnMapper;
 import org.darwin.genericDao.mapper.EntityMapper;
 import org.darwin.genericDao.operate.Matches;
+import org.darwin.genericDao.operate.Modifies;
 import org.darwin.genericDao.operate.Orders;
 import org.darwin.genericDao.query.Query;
+import org.darwin.genericDao.query.QueryDelete;
 import org.darwin.genericDao.query.QueryDistinctCount;
+import org.darwin.genericDao.query.QueryModify;
 import org.darwin.genericDao.query.QuerySelect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * 通用的扫描全多个数据库切片的DAO
- * created by Tianxin on 2015年6月15日 下午2:36:48
+ * 虚拟的通用dao
+ * <br/>created by Tianxin on 2015年6月24日 下午5:33:04
  */
-public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>> implements BaseAllShardsDao<KEY, ENTITY> {
+public class AbstractGenericDao<ENTITY> {
   /**
    * 默认生成的该类的LOG记录器，使用slf4j组件。避免产生编译警告，使用protected修饰符。
    */
-  protected final static Logger LOG = LoggerFactory.getLogger(GenericAllShardsDao.class);
-
+  protected final static Logger LOG = LoggerFactory.getLogger(AbstractGenericDao.class);
+  
   /**
-   * 构造函数，在这里对最主要的几个属性进行初始化
+   * 构造函数
    */
-  public GenericAllShardsDao() {
-    //GenericDao的第二个泛型是entityClass
-    Class<ENTITY> entityClass = GenericDaoUtils.getGenericEntityClass(this.getClass(), GenericAllShardsDao.class, 1);
-
+  public AbstractGenericDao() {
+    
+    Class<ENTITY> entityClass = GenericDaoUtils.getGenericEntityClass(this.getClass(), AbstractGenericDao.class, 0);
+    
     Table table = GenericDaoUtils.getTable(entityClass);
     Sequence sequence = GenericDaoUtils.getSequence(entityClass);
 
     this.entityClass = entityClass;
     this.configKeeper = new TableConfigKeeper(table, sequence);
     this.columnMappers = GenericDaoUtils.generateColumnMappers(entityClass, table.columnStyle());
-    this.allColumns = new ArrayList<String>(columnMappers.keySet());
+    this.writeHandler = new WriteSQLHandler<ENTITY>(columnMappers, configKeeper);
   }
-
+  
+  protected JdbcTemplate jdbcTemplate;
+  protected Class<ENTITY> entityClass;
+  protected TableConfigKeeper configKeeper;
+  protected WriteSQLHandler<ENTITY> writeHandler;
+  protected Map<String, ColumnMapper> columnMappers;
+  
   /**
    * 获取表名
    * 
@@ -64,33 +69,74 @@ public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseOb
   protected String table() {
     return configKeeper.table();
   }
-
-  private List<String> allColumns;
-  private Class<ENTITY> entityClass;
-  protected JdbcTemplate jdbcTemplate;
-  private TableConfigKeeper configKeeper;
-  private Map<String, ColumnMapper> columnMappers;
-
-  public ENTITY get(KEY id) {
-    if (id == null) {
-      return null;
-    }
-    List<ENTITY> entities = find(configKeeper.keyColumn(), id);
-    if (entities == null || entities.size() == 0) {
-      return null;
-    }
-    return entities.get(0);
+  
+  /**
+   * 新建一个对象
+   * @param entity
+   * @return
+   * <br/>created by Tianxin on 2015年6月24日 下午5:49:32
+   */
+  public boolean create(ENTITY entity) {
+    return create(Utils.one2List(entity)) >= 1;
   }
 
-  public List<ENTITY> get(Collection<KEY> ids) {
-    if (ids == null || ids.size() == 0) {
-      return null;
-    }
-    return find(configKeeper.keyColumn(), ids);
+  /**
+   * 新建一批对象
+   * @param entities
+   * @return
+   * <br/>created by Tianxin on 2015年6月24日 下午5:49:40
+   */
+  public int create(Collection<ENTITY> entities) {
+    String sql = writeHandler.generateInsertSQL(entities);
+    Object[] args = writeHandler.generateInsertParams(entities);
+    LOG.info(Utils.toLogSQL(sql, args));
+    return jdbcTemplate.update(sql, args);
+  }
+  
+  /**
+   * 如果column的取值match到了value则进行删除
+   * 
+   * @param column 字段名
+   * @param value 匹配值
+   * @return 删除条数 created by Tianxin on 2015年6月3日 下午8:33:29
+   */
+  protected int delete(String column, Object value) {
+    return delete(Matches.one(column, value));
+  }
+
+  /**
+   * 按照匹配条件删除数据
+   * 
+   * @param matches 匹配条件，可为null
+   * @return 删除条数 created by Tianxin on 2015年6月3日 下午8:34:03
+   */
+  protected int delete(Matches matches) {
+    QueryDelete query = new QueryDelete(matches, writeHandler.table());
+    String sql = query.getSQL();
+    Object[] params = query.getParams();
+    LOG.info(Utils.toLogSQL(sql, params));
+    return jdbcTemplate.update(sql, params);
+  }
+
+  /**
+   * 按照匹配条件进行更新
+   * 
+   * @param modifies 数据修改定义
+   * @param matches 匹配条件
+   * @return
+   */
+  protected int update(Modifies modifies, Matches matches) {
+    QueryModify modify = new QueryModify(modifies, matches, configKeeper.table());
+    String sql = modify.getSQL();
+    Object[] args = modify.getParams();
+    LOG.info(Utils.toLogSQL(sql, args));
+    return jdbcTemplate.update(sql, args);
   }
 
   /**
    * 获取所有的数据
+   * @return
+   * <br/>created by Tianxin on 2015年6月24日 下午5:50:21
    */
   public List<ENTITY> findAll() {
     return find(Matches.empty());
@@ -174,6 +220,7 @@ public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseOb
    * @return created by Tianxin on 2015年6月3日 下午8:47:09
    */
   protected List<ENTITY> page(Matches matches, Orders orders, int offset, int rows) {
+    List<String> allColumns = writeHandler.allColumns();
     return pageColumns(matches, orders, offset, rows, allColumns.toArray(new String[allColumns.size()]));
   }
 
@@ -214,12 +261,9 @@ public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseOb
     List<String> choozenColumns = Arrays.asList(columns);
     QuerySelect query = new QuerySelect(choozenColumns, matches, orders, configKeeper.table(), offset, rows);
     String sql = query.getSQL();
-    Object[] args = query.getParams();
-    LOG.info(Utils.toLogSQL(sql, args));
-    List<String> columnList = GenericDaoUtils.getColumnsFromSQL(sql);
-    List<ENTITY> entities = jdbcTemplate.query(sql, args, new EntityMapper<ENTITY>(columnList, columnMappers, entityClass));
-    Collections.sort(entities, new GenericComparator<ENTITY>(orders, columnMappers));
-    return entities;
+    Object[] params = query.getParams();
+    LOG.info(Utils.toLogSQL(sql, params));
+    return jdbcTemplate.query(sql, params, new EntityMapper<ENTITY>(choozenColumns, columnMappers, entityClass));
   }
 
   /**
@@ -250,10 +294,7 @@ public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseOb
     String sql = query.getSQL();
     Object[] params = query.getParams();
     LOG.info(Utils.toLogSQL(sql, params));
-    List<R> entities = jdbcTemplate.query(sql, params, BasicMappers.getMapper(rClass));
-    Collections.sort(entities, new GenericComparator<R>(orders, columnMappers));
-    return entities;
-
+    return jdbcTemplate.query(sql, params, BasicMappers.getMapper(rClass));
   }
 
   /**
@@ -264,11 +305,9 @@ public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseOb
    * @param params 参数
    * @return created by Tianxin on 2015年6月3日 下午8:50:26
    */
-  protected <E extends BaseObject<?>> List<E> findBySQL(Class<E> eClass, String sql, Object... params) {
+  protected <E> List<E> findBySQL(Class<E> eClass, String sql, Object... params) {
     LOG.info(Utils.toLogSQL(sql, params));
-    List<E> entities = jdbcTemplate.query(sql, params, BasicMappers.getEntityMapper(eClass, sql));
-    Collections.sort(entities, new GenericComparator<E>(sql, columnMappers));
-    return entities;
+    return jdbcTemplate.query(sql, params, BasicMappers.getEntityMapper(eClass, sql));
   }
 
   /**
@@ -343,7 +382,12 @@ public class GenericAllShardsDao<KEY extends Serializable, ENTITY extends BaseOb
     return jdbcTemplate.queryForInt(sql, params);
   }
 
-  public void setShardsJdbcTemplate(ScanShardsJdbcTemplate jdbcTemplate) {
+  /**
+   * 设置jdbcTemplate对象
+   * @param jdbcTemplate
+   * <br/>created by Tianxin on 2015年6月24日 下午5:50:42
+   */
+  public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
     this.jdbcTemplate = jdbcTemplate;
   }
 }

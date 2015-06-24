@@ -13,16 +13,16 @@ import org.darwin.genericDao.dao.TableShardRuleKeeper;
 /**
  * created by Tianxin on 2015年5月27日 下午7:57:31
  */
-public class AnnotationConfigKeeper {
+public class TableConfigKeeper {
 
   //私有化构造函数
-  private AnnotationConfigKeeper() {}
+  private TableConfigKeeper() {}
 
   /**
    * @param table
    * @param sequence
    */
-  public AnnotationConfigKeeper(Table table, Sequence sequence) {
+  public TableConfigKeeper(Table table, Sequence sequence) {
     this();
     this.table = table;
     this.sequence = sequence;

@@ -2,7 +2,7 @@
  * org.darwin.genericDao.annotations.StatColumn.java
  * created by Tianxin(tianjige@163.com) on 2015年6月3日 下午1:48:02
  */
-package org.darwin.genericDao.annotations.stat;
+package org.darwin.genericDao.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

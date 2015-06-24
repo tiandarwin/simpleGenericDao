@@ -20,10 +20,9 @@ import java.util.Map;
 
 import org.darwin.genericDao.annotations.Column;
 import org.darwin.genericDao.annotations.Sequence;
+import org.darwin.genericDao.annotations.StatType;
 import org.darwin.genericDao.annotations.Table;
 import org.darwin.genericDao.annotations.enums.ColumnStyle;
-import org.darwin.genericDao.annotations.stat.StatTable;
-import org.darwin.genericDao.annotations.stat.StatType;
 import org.darwin.genericDao.bo.BaseObject;
 import org.darwin.genericDao.mapper.BasicMappers;
 import org.darwin.genericDao.mapper.ColumnMapper;
@@ -93,26 +92,6 @@ public class GenericDaoUtils {
       clazz = clazz.getSuperclass();
     }
     return inheritClassChain;
-  }
-
-
-
-  /**
-   * 获取实体类中的StatTable的注解
-   * 
-   * @param entityClass
-   * @return created by Tianxin on 2015年6月1日 上午7:07:12
-   */
-  public static StatTable getStatTable(Class<?> entityClass) {
-    if (entityClass.equals(Object.class)) {
-      return null;
-    }
-    StatTable table = entityClass.getAnnotation(StatTable.class);
-    if (table == null) {
-      return getStatTable(entityClass.getSuperclass());
-    } else {
-      return table;
-    }
   }
 
   /**
@@ -282,12 +261,6 @@ public class GenericDaoUtils {
     Table table = entityClass.getAnnotation(Table.class);
     if(table != null){
       return table.columnStyle();
-    }
-    
-    //找StatTable标签s
-    StatTable sTable = entityClass.getAnnotation(StatTable.class);
-    if(sTable != null){
-      return sTable.columnStyle();
     }
     
     //没有任何标签的，默认按照驼峰到mysql的转

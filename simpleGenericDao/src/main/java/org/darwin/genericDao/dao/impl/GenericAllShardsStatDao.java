@@ -14,14 +14,13 @@ import java.util.Map;
 
 import org.darwin.common.utils.GenericDaoUtils;
 import org.darwin.common.utils.Utils;
+import org.darwin.genericDao.annotations.Table;
 import org.darwin.genericDao.annotations.enums.Type;
-import org.darwin.genericDao.annotations.stat.StatTable;
 import org.darwin.genericDao.bo.BaseObject;
 import org.darwin.genericDao.dao.BaseAllShardsStatDao;
 import org.darwin.genericDao.mapper.BasicMappers;
 import org.darwin.genericDao.mapper.ColumnMapper;
 import org.darwin.genericDao.mapper.EntityMapper;
-import org.darwin.genericDao.mapper.stat.StatAnnotationKeeper;
 import org.darwin.genericDao.operate.Groups;
 import org.darwin.genericDao.operate.Matches;
 import org.darwin.genericDao.operate.Orders;
@@ -49,10 +48,10 @@ public class GenericAllShardsStatDao<ENTITY> implements BaseAllShardsStatDao<ENT
    */
   public GenericAllShardsStatDao() {
     Class<ENTITY> entityClass = GenericDaoUtils.getGenericEntityClass(this.getClass(), GenericAllShardsStatDao.class, 0);
-    StatTable table = GenericDaoUtils.getStatTable(entityClass);
+    Table table = GenericDaoUtils.getTable(entityClass);
 
     this.entityClass = entityClass;
-    this.configKeeper = new StatAnnotationKeeper(table);
+    this.configKeeper = new TableConfigKeeper(table, null);
     this.columnMappers = GenericDaoUtils.generateColumnMappers(entityClass, table.columnStyle());
     this.analysisColumns(columnMappers);
   }
@@ -98,7 +97,7 @@ public class GenericAllShardsStatDao<ENTITY> implements BaseAllShardsStatDao<ENT
 
   private Class<ENTITY> entityClass = null;
   private ScanShardsJdbcTemplate jdbcTemplate;
-  private StatAnnotationKeeper configKeeper;
+  private TableConfigKeeper configKeeper;
   private Map<String, ColumnMapper> columnMappers;
 
   public void setJdbcTemplate(ScanShardsJdbcTemplate jdbcTemplate) {

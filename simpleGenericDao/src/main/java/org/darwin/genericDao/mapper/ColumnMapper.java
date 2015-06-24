@@ -10,8 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.darwin.genericDao.annotations.Column;
+import org.darwin.genericDao.annotations.StatType;
 import org.darwin.genericDao.annotations.enums.ColumnStyle;
-import org.darwin.genericDao.annotations.stat.StatType;
 import org.darwin.genericDao.mapper.jdbc.FetcherCache;
 import org.darwin.genericDao.mapper.jdbc.TypeFetcher;
 
