@@ -26,6 +26,7 @@ import org.darwin.genericDao.operate.Matches;
 import org.darwin.genericDao.operate.Orders;
 import org.darwin.genericDao.param.SQLParams;
 import org.darwin.genericDao.query.Query;
+import org.darwin.genericDao.query.QueryDelete;
 import org.darwin.genericDao.query.QueryDistinctCount;
 import org.darwin.genericDao.query.QuerySelect;
 import org.darwin.genericDao.query.QueryStat;
@@ -509,5 +510,30 @@ public class GenericStatDao<ENTITY> {
   protected <E extends BaseObject<?>> List<E> findBySQL(Class<E> eClass, String sql, Object... params) {
     LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.query(sql, params, BasicMappers.getEntityMapper(eClass, sql));
+  }
+  
+  /**
+   * 如果column的取值match到了value则进行删除
+   * 
+   * @param column 字段名
+   * @param value 匹配值
+   * @return 删除条数 created by Tianxin on 2015年6月3日 下午8:33:29
+   */
+  protected int delete(String column, Object value) {
+    return delete(Matches.one(column, value));
+  }
+
+  /**
+   * 按照匹配条件删除数据
+   * 
+   * @param matches 匹配条件，可为null
+   * @return 删除条数 created by Tianxin on 2015年6月3日 下午8:34:03
+   */
+  protected int delete(Matches matches) {
+    QueryDelete query = new QueryDelete(matches, configKeeper.table());
+    String sql = query.getSQL();
+    Object[] params = query.getParams();
+    LOG.info(Utils.toLogSQL(sql, params));
+    return jdbcTemplate.update(sql, params);
   }
 }

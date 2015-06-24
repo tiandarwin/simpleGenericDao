@@ -78,4 +78,24 @@ public class Orders implements Operate {
   public static Orders one(String column, boolean asc) {
     return asc ? Orders.init().addAsc(column) : Orders.init().addDesc(column);
   }
+  
+  /**
+   * 添加一个正向排序
+   * @param column
+   * @return
+   * created by Tianxin on 2015年5月27日 下午6:22:33
+   */
+  public static Orders asc(String column) {
+    return one(column, true);
+  }
+  
+  /**
+   * 一个倒序得而排序
+   * @param column
+   * @return
+   * created by Tianxin on 2015年5月27日 下午6:22:33
+   */
+  public static Orders desc(String column) {
+    return one(column, false);
+  }
 }

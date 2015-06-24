@@ -22,7 +22,7 @@ public class StatUtils {
    * @return
    * created by Tianxin on 2015年6月4日 下午4:29:33
    */
-  public final static int getToday() {
+  public final static int getTodayInt() {
     Date date = new Date();
     return getDateInt(date);
   }
@@ -32,7 +32,7 @@ public class StatUtils {
    * @return
    * created by Tianxin on 2015年6月4日 下午4:30:04
    */
-  public final static int getYesterday() {
+  public final static int getYesterdayInt() {
     Date date = new Date(System.currentTimeMillis() - millisOneDay);
     return getDateInt(date);
   }
@@ -73,11 +73,12 @@ public class StatUtils {
   }
 
   /**
+   * 获取date的下一天
    * @param date
    * @return
    * created by Tianxin on 2015年6月4日 下午4:55:49
    */
-  public static int getNextDate(int date) {
+  public static int getNextDateInt(int date) {
     try {
       SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd");
       Date oDate = formater.parse(String.valueOf(date));
@@ -87,6 +88,56 @@ public class StatUtils {
       throw new RuntimeException(e);
     }
   }
+
+  /**
+   * 获取date的前一天
+   * @param date
+   * @return
+   * <br/>created by Tianxin on 2015年6月23日 下午1:44:08
+   */
+  public static int getLastDateInt(int date) {
+    try {
+      SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd");
+      Date oDate = formater.parse(String.valueOf(date));
+      Date next = new Date(oDate.getTime() - millisOneDay);
+      return getDateInt(next);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  /**
+   * 获取date的下一天
+   * @param date
+   * @return
+   * created by Tianxin on 2015年6月4日 下午4:55:49
+   */
+  public static Date getNextDate(int date) {
+    try {
+      SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd");
+      Date oDate = formater.parse(String.valueOf(date));
+      return new Date(oDate.getTime() + millisOneDay);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  /**
+   * 获取date的前一天
+   * @param date
+   * @return
+   * <br/>created by Tianxin on 2015年6月23日 下午1:44:08
+   */
+  public static Date getLastDate(int date) {
+    try {
+      SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd");
+      Date oDate = formater.parse(String.valueOf(date));
+      return new Date(oDate.getTime() - millisOneDay);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
 
   /**
    * 返回标准的时间格式
