@@ -75,7 +75,7 @@ public class BasicMappers {
   public static <ENTITY extends Object> RowMapper<ENTITY> getEntityMapper(Class<ENTITY> eClass, String sql) {
 
     //看是否是基本类型
-    RowMapper<ENTITY> mapper = getMapper(eClass);
+    RowMapper<ENTITY> mapper = getMapper(eClass, true);
     if(mapper != null){
       return mapper;
     }
@@ -89,9 +89,15 @@ public class BasicMappers {
    * 获取一个基础类的mapper
    * 
    * @param rClass
+   * @param nullable    是否允许为空
    * @return created by Tianxin on 2015年6月1日 下午1:49:42
    */
-  public static <R> RowMapper<R> getMapper(Class<R> rClass) {
+  private static <R> RowMapper<R> getMapper(Class<R> rClass, boolean nullable) {
+    
+    if(nullable && !FetcherCache.contains(rClass)){
+      return null;
+    }
+    
     final TypeFetcher fetcher = FetcherCache.getFetcher(rClass);
     return new RowMapper<R>() {
 
@@ -101,5 +107,14 @@ public class BasicMappers {
       }
     };
   }
-
+  
+  /**
+   * 获取一个基础类的mapper
+   * 
+   * @param rClass
+   * @return created by Tianxin on 2015年6月1日 下午1:49:42
+   */
+  public static <R> RowMapper<R> getMapper(Class<R> rClass) {
+    return getMapper(rClass, false);
+  }
 }
