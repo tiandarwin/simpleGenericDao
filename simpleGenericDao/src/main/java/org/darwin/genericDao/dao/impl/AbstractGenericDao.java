@@ -87,6 +87,9 @@ public class AbstractGenericDao<ENTITY> {
    * <br/>created by Tianxin on 2015年6月24日 下午5:49:40
    */
   public int create(Collection<ENTITY> entities) {
+    if(Utils.isEmpty(entities)){
+      return 0; 
+    }
     String sql = writeHandler.generateInsertSQL(entities);
     Object[] args = writeHandler.generateInsertParams(entities);
     LOG.info(Utils.toLogSQL(sql, args));

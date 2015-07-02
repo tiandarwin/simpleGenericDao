@@ -7,7 +7,6 @@ package org.darwin.common.utils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -107,7 +106,7 @@ public class Utils {
    */
   public final static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> List<KEY> extractKeys(Collection<ENTITY> entities) {
     if (isEmpty(entities)) {
-      return Collections.emptyList();
+      return new ArrayList<KEY>(0);
     }
     List<KEY> keys = new ArrayList<KEY>(entities.size());
     for (ENTITY entity : entities) {
@@ -126,12 +125,31 @@ public class Utils {
    */
   public final static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> Set<KEY> extractKeySet(Collection<ENTITY> entities) {
     if (isEmpty(entities)) {
-      return Collections.emptySet();
+      return newSet(0);
     }
     Set<KEY> keys = newSet(entities.size());
     for (ENTITY entity : entities) {
       if (entity != null) {
         keys.add(entity.getId());
+      }
+    }
+    return keys;
+  }
+  
+  /**
+   * 抽取实体列表的key作为一个新的列表,null的对象会被跳过
+   * @param entities
+   * @return
+   * created by Tianxin on 2015年6月4日 下午1:35:07
+   */
+  public final static <KEY extends Serializable, ENTITY> Set<KEY> extractKeySet(Collection<ENTITY> entities, KeyGetter<KEY, ENTITY> keyGetter) {
+    if (isEmpty(entities)) {
+      return newSet(0);
+    }
+    Set<KEY> keys = newSet(entities.size());
+    for (ENTITY entity : entities) {
+      if (entity != null) {
+        keys.add(keyGetter.getKey(entity));
       }
     }
     return keys;
@@ -145,12 +163,84 @@ public class Utils {
    */
   public final static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> Map<KEY, ENTITY> trans2Map(Collection<ENTITY> entities) {
     if (isEmpty(entities)) {
-      return Collections.emptyMap();
+      return newMap(0);
     }
     Map<KEY, ENTITY> map = newMap(entities.size());
     for (ENTITY entity : entities) {
       if (entity != null) {
         map.put(entity.getId(), entity);
+      }
+    }
+    return map;
+  }
+  
+  /**
+   * 将entities变为一个map
+   * @param entities
+   * @param entryGetter
+   * @return
+   * <br/>created by Tianxin on 2015年7月1日 下午5:46:26
+   */
+  public final static <K,V,ENTITY> Map<K, V> trans2Map(List<ENTITY> entities, EntryGetter<ENTITY,K,V> entryGetter){
+    if(isEmpty(entities)){
+      return newMap(0);
+    }
+    Map<K,V> map = newMap(entities.size());
+    for(ENTITY entity : entities){
+      map.put(entryGetter.getKey(entity), entryGetter.getValue(entity));
+    }
+    return map;
+  }
+  
+  /**
+   * 将实体列表转化为一个map，key为keyGetter获取到的key，value为实体本身
+   * @param entities
+   * @param keyGetter 从entity中获取放到hashMap里的key
+   * @return
+   * created by Tianxin on 2015年6月4日 下午1:35:07
+   */
+  public final static <KEY extends Serializable, ENTITY> Map<KEY, ENTITY> trans2Map(Collection<ENTITY> entities, KeyGetter<KEY, ENTITY> keyGetter, boolean checkDuplicate) {
+    if (isEmpty(entities)) {
+      return newMap(0);
+    }
+    Map<KEY, ENTITY> map = newMap(entities.size());
+    for (ENTITY entity : entities) {
+      if (entity != null) {
+        
+        KEY key = keyGetter.getKey(entity);
+        ENTITY o = map.get(key);
+        
+        if(o != null && checkDuplicate){
+          throw new RuntimeException(connect(key, " 有两个重复的值在列表中！"));
+        }
+        map.put(key, entity);
+      }
+    }
+    return map;
+  }
+  
+  /**
+   * 将实体列表转化为一个map，key为keyGetter获取到的key，value为实体本身
+   * @param entities
+   * @param keyGetter 从entity中获取放到hashMap里的key
+   * @return
+   * created by Tianxin on 2015年6月4日 下午1:35:07
+   */
+  public final static <KEY extends Serializable, ENTITY> Map<KEY, List<ENTITY>> trans2KeyListMap(Collection<ENTITY> entities, KeyGetter<KEY, ENTITY> keyGetter) {
+    if (isEmpty(entities)) {
+      return newMap(0);
+    }
+    Map<KEY, List<ENTITY>> map = newMap(entities.size());
+    for (ENTITY entity : entities) {
+      if (entity != null) {
+        
+        KEY key = keyGetter.getKey(entity);
+        List<ENTITY> list = map.get(key);
+        if(list == null){
+          list = new ArrayList<ENTITY>();
+          map.put(key, list);
+        }
+        list.add(entity);
       }
     }
     return map;
@@ -164,7 +254,7 @@ public class Utils {
    */
   public final static <KEY> Set<KEY> trans2Set(Collection<KEY> keys) {
     if (isEmpty(keys)) {
-      return Collections.emptySet();
+      return newSet(0);
     }
     Set<KEY> set = newSet(keys.size());
     for (KEY key : keys) {
@@ -201,7 +291,7 @@ public class Utils {
    */
   public final static <E> List<E> toList(E... es) {
     if (es == null || es.length == 0) {
-      return Collections.emptyList();
+      return new ArrayList<E>(0);
     }
 
     List<E> list = new ArrayList<E>(es.length);
@@ -219,7 +309,7 @@ public class Utils {
    */
   public final static <E> List<E> one2List(E e) {
     if (e == null) {
-      return Collections.emptyList();
+      return new ArrayList<E>(0);
     }
 
     List<E> list = new ArrayList<E>(1);
@@ -241,6 +331,23 @@ public class Utils {
     for (Object o : os) {
       sb.append(o);
     }
+    return sb.toString();
+  }
+  /**
+   * 字符串连接
+   * 
+   * @param os
+   * @return
+   */
+  public final static String connectBySplit(String split, Object... os) {
+    if (os == null || os.length == 0) {
+      return "";
+    }
+    StringBuilder sb = new StringBuilder(os.length * 5);
+    for (Object o : os) {
+      sb.append(o).append(split);
+    }
+    sb.delete(sb.length() - split.length(), sb.length());
     return sb.toString();
   }
 
@@ -319,7 +426,7 @@ public class Utils {
     boolean empty2 = isEmpty(list2);
     
     if(empty1 && empty2){
-      return Collections.emptyList();
+      return new ArrayList<E>(0);
     }else if(empty1){
       return new ArrayList<E>(list2);
     }else if(empty2){
@@ -353,7 +460,7 @@ public class Utils {
   public final static <K extends Serializable, E extends BaseObject<K>> List<E> getCrossedList(Collection<E> list1, Collection<E> list2){
     
     if(isEmpty(list1) || isEmpty(list2)){
-      return Collections.emptyList();
+      return new ArrayList<E>(0);
     }
     
     Set<K> ks = extractKeySet(list1);
