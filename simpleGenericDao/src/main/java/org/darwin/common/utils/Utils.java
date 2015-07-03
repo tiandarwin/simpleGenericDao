@@ -218,7 +218,7 @@ public class Utils {
    * @return
    * created by Tianxin on 2015年6月4日 下午1:35:07
    */
-  public final static <KEY extends Serializable, ENTITY> Map<KEY, ENTITY> trans2Map(Collection<? extends ENTITY> entities, KeyGetter<KEY, ENTITY> keyGetter, boolean checkDuplicate) {
+  public final static <KEY extends Serializable, ENTITY> Map<KEY, ENTITY> trans2Map(Collection<ENTITY> entities, KeyGetter<KEY, ? super ENTITY> keyGetter, boolean checkDuplicate) {
     if (isEmpty(entities)) {
       return newMap(0);
     }
@@ -245,7 +245,7 @@ public class Utils {
    * @return
    * created by Tianxin on 2015年6月4日 下午1:35:07
    */
-  public final static <KEY extends Serializable, ENTITY> Map<KEY, List<ENTITY>> trans2KeyListMap(Collection<? extends ENTITY> entities, KeyGetter<KEY, ENTITY> keyGetter) {
+  public final static <KEY extends Serializable, ENTITY> Map<KEY, List<ENTITY>> trans2KeyListMap(Collection<ENTITY> entities, KeyGetter<KEY, ? super ENTITY> keyGetter) {
     if (isEmpty(entities)) {
       return newMap(0);
     }
