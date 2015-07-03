@@ -19,8 +19,9 @@ import org.darwin.genericDao.bo.BaseObject;
 /**
  * 一些通用的方法集
  * created by Tianxin on 2015年6月4日 下午1:25:52
+ * @param <K>
  */
-public class Utils {
+public class Utils<K> {
 
   /**
    * 生成一个新的map，按加载因子计算一个合适的长度
@@ -194,13 +195,13 @@ public class Utils {
   }
   
   /**
-   * 将entities变为一个map
+   * 将entities中的每个对象提取出相应的key与value组成一个map
    * @param entities
    * @param entryGetter
    * @return
    * <br/>created by Tianxin on 2015年7月1日 下午5:46:26
    */
-  public final static <K,V,ENTITY> Map<K, V> trans2Map(Collection<? extends ENTITY> entities, EntryGetter<ENTITY,K,V> entryGetter){
+  public final static <K,V,ENTITY> Map<K, V> extract2Map(Collection<ENTITY> entities, EntryGetter<ENTITY,K,V> entryGetter){
     if(isEmpty(entities)){
       return newMap(0);
     }
@@ -211,6 +212,16 @@ public class Utils {
     return map;
   }
   
+  /**
+   * 将实体列表转化为一个map，key为keyGetter获取到的key，value为实体本身
+   * @param entities
+   * @param keyGetter 从entity中获取放到hashMap里的key
+   * @return
+   * created by Tianxin on 2015年6月4日 下午1:35:07
+   */
+  public final static <KEY extends Serializable, ENTITY> Map<KEY, ENTITY> trans2Map(Collection<ENTITY> entities, KeyGetter<KEY, ? super ENTITY> keyGetter) {
+    return trans2Map(entities, keyGetter, false);
+  }
   /**
    * 将实体列表转化为一个map，key为keyGetter获取到的key，value为实体本身
    * @param entities
@@ -599,4 +610,5 @@ public class Utils {
     }
     return param;
   }
+  
 }

@@ -133,7 +133,7 @@ public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implement
    * @return created by Tianxin on 2015年6月4日 下午8:23:27
    */
   public <R> List<R> statPageOneColumnByMgo(Matches matches, Groups groups, Orders orders, String column, Class<R> rClass, int offset, int rows) {
-    QueryStat query = new QueryStat( Arrays.asList(column), matches, orders, groups, configKeeper.table(), offset, rows);
+    QueryStat query = new QueryStat( Arrays.asList(column), matches, groups, orders, configKeeper.table(), offset, rows);
     String sql = query.getSQL();
     Object[] params = query.getParams();
     LOG.info(Utils.toLogSQL(sql, params));
@@ -149,7 +149,7 @@ public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implement
    * @return created by Tianxin on 2015年6月4日 下午8:23:27
    */
   public List<ENTITY> statByMgo(Matches matches, Groups groups, Orders orders) {
-    QueryStat query = new QueryStat(allColumns, matches, orders, groups, configKeeper.table());
+    QueryStat query = new QueryStat(allColumns, matches, groups, orders, configKeeper.table());
     return statByQuery(query);
   }
 
@@ -162,7 +162,7 @@ public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implement
    * @return created by Tianxin on 2015年6月4日 下午8:23:27
    */
   public List<ENTITY> statPageByMgo(Matches matches, Groups groups, Orders orders, int offset, int rows) {
-    QueryStat query = new QueryStat(allColumns, matches, orders, groups, configKeeper.table(), offset, rows);
+    QueryStat query = new QueryStat(allColumns, matches, groups, orders, configKeeper.table(), offset, rows);
     return statByQuery(query);
   }
 

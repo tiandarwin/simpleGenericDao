@@ -26,7 +26,7 @@ public class QueryStat implements Query {
   private QueryStat() {}
 
   public QueryStat(List<String> columns, Matches matches,
-      Orders orders, Groups groups, String table) {
+      Groups groups, Orders orders, String table) {
     this();
     this.matches = matches;
     this.orders = orders;
@@ -36,8 +36,8 @@ public class QueryStat implements Query {
   }
   
   public QueryStat(List<String> columns, Matches matches,
-      Orders orders, Groups groups, String table, int offset, int rows) {
-    this(columns, matches, orders, groups, table);
+      Groups groups, Orders orders, String table, int offset, int rows) {
+    this(columns, matches, groups, orders, table);
     this.offset = offset;
     this.rows = rows;
   }
