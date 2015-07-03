@@ -9,13 +9,13 @@ package org.darwin.genericDao.annotations.enums;
  * created by Tianxin on 2015年6月3日 下午1:55:45
  */
 public enum Type {
-	SUM(1),AVG(2),KEY(3),DATE(4),EXTEND(5);
+	SUM("sum"),AVG("avg"),KEY(null),DATE(null),EXTEND(null), MAX("max"), MIN("min");
 	
-	private int value = 1;
-	private Type(int value) {
+	private String value = null;
+	private Type(String value) {
 		this.value = value;
 	}
-	public int value(){
+	public String value(){
 		return this.value;
 	}
 	

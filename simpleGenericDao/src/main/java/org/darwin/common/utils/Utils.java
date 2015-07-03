@@ -123,6 +123,25 @@ public class Utils {
    * @return
    * created by Tianxin on 2015年6月4日 下午1:35:07
    */
+  public final static <KEY extends Serializable, ENTITY> List<KEY> extractKeys(Collection<? extends ENTITY> entities, KeyGetter<KEY, ENTITY> keyGetter) {
+    if (isEmpty(entities)) {
+      return new ArrayList<KEY>(0);
+    }
+    List<KEY> keys = new ArrayList<KEY>(entities.size());
+    for (ENTITY entity : entities) {
+      if (entity != null) {
+        keys.add(keyGetter.getKey(entity));
+      }
+    }
+    return keys;
+  }
+  
+  /**
+   * 抽取实体列表的key作为一个新的列表,null的对象会被跳过
+   * @param entities
+   * @return
+   * created by Tianxin on 2015年6月4日 下午1:35:07
+   */
   public final static <KEY extends Serializable, ENTITY extends BaseObject<KEY>> Set<KEY> extractKeySet(Collection<ENTITY> entities) {
     if (isEmpty(entities)) {
       return newSet(0);
@@ -142,7 +161,7 @@ public class Utils {
    * @return
    * created by Tianxin on 2015年6月4日 下午1:35:07
    */
-  public final static <KEY extends Serializable, ENTITY> Set<KEY> extractKeySet(Collection<ENTITY> entities, KeyGetter<KEY, ENTITY> keyGetter) {
+  public final static <KEY extends Serializable, ENTITY> Set<KEY> extractKeySet(Collection<? extends ENTITY> entities, KeyGetter<KEY, ENTITY> keyGetter) {
     if (isEmpty(entities)) {
       return newSet(0);
     }
@@ -181,7 +200,7 @@ public class Utils {
    * @return
    * <br/>created by Tianxin on 2015年7月1日 下午5:46:26
    */
-  public final static <K,V,ENTITY> Map<K, V> trans2Map(List<ENTITY> entities, EntryGetter<ENTITY,K,V> entryGetter){
+  public final static <K,V,ENTITY> Map<K, V> trans2Map(Collection<? extends ENTITY> entities, EntryGetter<ENTITY,K,V> entryGetter){
     if(isEmpty(entities)){
       return newMap(0);
     }
@@ -199,7 +218,7 @@ public class Utils {
    * @return
    * created by Tianxin on 2015年6月4日 下午1:35:07
    */
-  public final static <KEY extends Serializable, ENTITY> Map<KEY, ENTITY> trans2Map(Collection<ENTITY> entities, KeyGetter<KEY, ENTITY> keyGetter, boolean checkDuplicate) {
+  public final static <KEY extends Serializable, ENTITY> Map<KEY, ENTITY> trans2Map(Collection<? extends ENTITY> entities, KeyGetter<KEY, ENTITY> keyGetter, boolean checkDuplicate) {
     if (isEmpty(entities)) {
       return newMap(0);
     }
@@ -226,7 +245,7 @@ public class Utils {
    * @return
    * created by Tianxin on 2015年6月4日 下午1:35:07
    */
-  public final static <KEY extends Serializable, ENTITY> Map<KEY, List<ENTITY>> trans2KeyListMap(Collection<ENTITY> entities, KeyGetter<KEY, ENTITY> keyGetter) {
+  public final static <KEY extends Serializable, ENTITY> Map<KEY, List<ENTITY>> trans2KeyListMap(Collection<? extends ENTITY> entities, KeyGetter<KEY, ENTITY> keyGetter) {
     if (isEmpty(entities)) {
       return newMap(0);
     }

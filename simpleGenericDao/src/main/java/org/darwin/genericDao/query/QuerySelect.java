@@ -161,4 +161,9 @@ public class QuerySelect implements Query {
     }
     return false;
   }
+  
+  public static void main(String[] args) {
+    String s = "select max( a + b ) as xxx, min(ssss);";
+    System.out.println(cleanStatOperator(s));
+  }
 }
