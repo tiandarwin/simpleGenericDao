@@ -19,9 +19,8 @@ import org.darwin.genericDao.bo.BaseObject;
 /**
  * 一些通用的方法集
  * created by Tianxin on 2015年6月4日 下午1:25:52
- * @param <K>
  */
-public class Utils<K> {
+public class Utils {
 
   /**
    * 生成一个新的map，按加载因子计算一个合适的长度

@@ -4,8 +4,10 @@
  */
 package org.darwin.genericDao.query;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.operate.Groups;
 import org.darwin.genericDao.operate.Matches;
 import org.darwin.genericDao.operate.Orders;
@@ -25,8 +27,15 @@ public class QueryStat implements Query {
 
   private QueryStat() {}
 
-  public QueryStat(List<String> columns, Matches matches,
-      Groups groups, Orders orders, String table) {
+  /**
+   * 构造函数
+   * @param columns 处理好的列
+   * @param matches
+   * @param groups
+   * @param orders
+   * @param table
+   */
+  public QueryStat(List<String> columns, Matches matches, Groups groups, Orders orders, String table) {
     this();
     this.matches = matches;
     this.orders = orders;
@@ -34,9 +43,52 @@ public class QueryStat implements Query {
     this.table = table;
     this.columns = columns;
   }
-  
-  public QueryStat(List<String> columns, Matches matches,
-      Groups groups, Orders orders, String table, int offset, int rows) {
+
+  /**
+   * 
+   * 构造函数
+   * @param toSumColumns  要做sum的列
+   * @param toAvgColumns  要做avg的列
+   * @param otherColumns
+   * @param matches
+   * @param groups
+   * @param orders
+   * @param table
+   */
+  public QueryStat(List<String> toSumColumns, List<String> toAvgColumns, List<String> otherColumns, Matches matches, Groups groups, Orders orders,
+      String table) {
+    this(null, matches, groups, orders, table);
+    
+    this.columns = new ArrayList<String>(5);
+
+    //添加统计列
+    if (!Utils.isEmpty(otherColumns)) {
+      columns.addAll(otherColumns);
+    }
+    //添加统计列
+    if (!Utils.isEmpty(toSumColumns)) {
+      for (String column : toSumColumns) {
+        columns.add(Utils.connect("sum(", column, ") as ", column));
+      }
+    }
+    if (!Utils.isEmpty(toAvgColumns)) {
+      for (String column : toAvgColumns) {
+        columns.add(Utils.connect("avg(", column, ") as ", column));
+      }
+    }
+  }
+
+  /**
+   * 构造函数
+   * @param columns 处理好的列
+   * @param matches
+   * @param groups
+   * @param orders
+   * @param table
+   * @param offset
+   * @param rows
+   */
+  public QueryStat(List<String> columns, Matches matches, Groups groups, Orders orders, String table, int offset, int rows) {
     this(columns, matches, groups, orders, table);
     this.offset = offset;
     this.rows = rows;
@@ -45,7 +97,7 @@ public class QueryStat implements Query {
   public String getSQL() {
     StringBuilder sb = new StringBuilder(256);
     sb.append("select ");
-    for(String column : columns){
+    for (String column : columns) {
       sb.append(column).append(',');
     }
     sb.deleteCharAt(sb.length() - 1);

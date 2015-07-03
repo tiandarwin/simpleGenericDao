@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.darwin.common.utils.GenericDaoUtils;
 import org.darwin.common.utils.Utils;
+import org.darwin.genericDao.annotations.StatType;
 import org.darwin.genericDao.annotations.enums.Type;
 import org.darwin.genericDao.dao.BaseStatDao;
 import org.darwin.genericDao.mapper.BasicMappers;
@@ -52,36 +53,34 @@ public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implement
   private void analysisColumns(Map<String, ColumnMapper> columnMappers) {
     Collection<ColumnMapper> mappers = columnMappers.values();
     for (ColumnMapper mapper : mappers) {
+      
+      //获取statType与操作符
+      StatType statType = mapper.getType();
+      Type type = statType == null ? Type.KEY : statType.value();
 
-      // 如果咩有统计类型的设置，则直接跳过
-      allColumns.add(mapper.getSQLColumn());
-      if (mapper.getType() == null) {
-        continue;
+      // 将字段处理好之后放到columns中
+      String sqlColumn = mapper.getSQLColumn();
+      if(type.value() != null){
+        sqlColumn = Utils.connect(type.value(), "(", sqlColumn, ") as ", sqlColumn);
       }
-
-      // 根据统计类型放到不同的地方，这里使用switch，编译后会出现内部类，导致一些莫名的错误，暂时使用ifelse
-      Type type = mapper.getType().value();
-      if (Type.KEY == type) {
-        keyColumns.add(mapper.getSQLColumn());
-      } else if (Type.SUM == type) {
-        sumColumns.add(mapper.getSQLColumn());
-      } else if (Type.AVG == type) {
-        avgColumns.add(mapper.getSQLColumn());
-      } else if (Type.EXTEND == type) {
-        extendColumns.add(mapper.getSQLColumn());
-      } else if (Type.DATE == type) {
-        dateColumn = mapper.getSQLColumn();
-        keyColumns.add(dateColumn);
+      allColumns.add(sqlColumn);
+      
+      //时间字段
+      if(type == Type.DATE){
+        keyColumns.add(sqlColumn);
+        dateColumn = sqlColumn;
+      }
+      
+      //key字段
+      if(type == Type.KEY){
+        keyColumns.add(sqlColumn);
       }
     }
   }
 
   private String dateColumn = null;
-  private List<String> sumColumns = new ArrayList<String>();
-  private List<String> avgColumns = new ArrayList<String>();
   private List<String> keyColumns = new ArrayList<String>();
   private List<String> allColumns = new ArrayList<String>();
-  private List<String> extendColumns = new ArrayList<String>();
 
   /**
    * 获取数据，如果需要按时间聚合，则按其他字段groupBy，把不同时间的汇总到一起
