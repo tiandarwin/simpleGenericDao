@@ -296,19 +296,16 @@ public class AbstractGenericDao<ENTITY> {
     QuerySelect query = new QuerySelect(columns, matches, orders, configKeeper.table(), offset, rows);
     String sql = query.getSQL();
     Object[] params = query.getParams();
-    LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.query(sql, params, BasicMappers.getMapper(rClass));
   }
+  
+  protected List<ENTITY> find(Query query){
+    return find(query, entityClass);
+  }
 
-  /**
-   * 根据SQL查询结果
-   * 
-   * @param eClass 结果映射到的对象
-   * @param sql 查询SQL
-   * @param params 参数
-   * @return created by Tianxin on 2015年6月3日 下午8:50:26
-   */
-  protected <E> List<E> findBySQL(Class<E> eClass, String sql, Object... params) {
+  protected <E> List<E> find(Query query, Class<E> eClass){
+    String sql = query.getSQL();
+    Object[] params = query.getParams();
     LOG.info(Utils.toLogSQL(sql, params));
     return jdbcTemplate.query(sql, params, BasicMappers.getEntityMapper(eClass, sql));
   }
