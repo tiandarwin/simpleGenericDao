@@ -63,7 +63,7 @@ public class ScanShardsJdbcTemplate extends JdbcTemplate {
   }
 
   private Integer getShardingKey() {
-    ThreadContext.ensuerInited();
+    ThreadContext.ensureInited();
     if (shardingKeyName == null) {
       return ThreadContext.getShardingKey();
     } else {
@@ -72,7 +72,7 @@ public class ScanShardsJdbcTemplate extends JdbcTemplate {
   }
 
   private void putShardingKey(Object key) {
-    ThreadContext.ensuerInited();
+    ThreadContext.ensureInited();
     if (shardingKeyName == null) {
       ThreadContext.putShardingKey(key);
     } else {

@@ -57,9 +57,28 @@ public class QueryStat implements Query {
    */
   public QueryStat(List<String> toSumColumns, List<String> toAvgColumns, List<String> otherColumns, Matches matches, Groups groups, Orders orders,
       String table) {
+    this(toSumColumns, toAvgColumns, otherColumns, matches, groups, orders, table, 0, 0);
+  }
+
+  /**
+   * 构造函数
+   * @param toSumColumns
+   * @param toAvgColumns
+   * @param otherColumns
+   * @param matches
+   * @param groups
+   * @param orders
+   * @param table
+   * @param offset
+   * @param rows
+   */
+  public QueryStat(List<String> toSumColumns, List<String> toAvgColumns, List<String> otherColumns, Matches matches, Groups groups, Orders orders,
+      String table, int offset, int rows) {
     this(null, matches, groups, orders, table);
-    
+
     this.columns = new ArrayList<String>(5);
+    this.offset = offset;
+    this.rows = rows;
 
     //添加统计列
     if (!Utils.isEmpty(otherColumns)) {

@@ -16,7 +16,6 @@ import org.darwin.genericDao.annotations.Sequence;
 import org.darwin.genericDao.annotations.Table;
 import org.darwin.genericDao.mapper.BasicMappers;
 import org.darwin.genericDao.mapper.ColumnMapper;
-import org.darwin.genericDao.mapper.EntityMapper;
 import org.darwin.genericDao.operate.Matches;
 import org.darwin.genericDao.operate.Modifies;
 import org.darwin.genericDao.operate.Orders;
@@ -266,7 +265,7 @@ public class AbstractGenericDao<ENTITY> {
     String sql = query.getSQL();
     Object[] params = query.getParams();
     LOG.info(Utils.toLogSQL(sql, params));
-    return jdbcTemplate.query(sql, params, new EntityMapper<ENTITY>(choozenColumns, columnMappers, entityClass));
+    return jdbcTemplate.query(sql, params, BasicMappers.getEntityMapper(entityClass, sql));
   }
 
   /**
@@ -388,6 +387,7 @@ public class AbstractGenericDao<ENTITY> {
    * <br/>created by Tianxin on 2015年6月24日 下午5:50:42
    */
   public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+    
     this.jdbcTemplate = jdbcTemplate;
   }
 }

@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class ThreadContext {
   
-  public static void ensuerInited(){
+  public static void ensureInited(){
     if(CTX.get() == null){
       init();
     }
@@ -35,7 +35,7 @@ public class ThreadContext {
   }
 
   /**
-   * 线程上下文的初始化
+   * 线程上下文的初始化。init方法必须和clean方法配合使用。在线程的最外层调用中，先init，然后在finally中clean。
    * 
    * created by Tianxin on 2015年6月8日 上午10:33:31
    */
@@ -52,7 +52,12 @@ public class ThreadContext {
    * created by Tianxin on 2015年6月8日 上午10:35:53
    */
   public final static <V> void put(String key, V value) {
+    try{
     CTX.get().put(key, value);
+    }catch(NullPointerException e){
+      System.out.println("调用ThreadContext时，必须要先进行ThreadContext的init，线程退出前再进行clean，避免被其他线程使用到本线程的数据，发生线程安全问题。");
+      throw e;
+    }
   }
 
   /**

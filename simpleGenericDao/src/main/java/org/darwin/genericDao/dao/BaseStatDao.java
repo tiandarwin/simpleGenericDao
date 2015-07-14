@@ -10,14 +10,7 @@ import java.util.List;
  * 统计SQL的DAO
  * created by Tianxin on 2015年5月28日 下午11:20:23
  */
-public interface BaseStatDao<ENTITY> {
-
-  /**
-   * 获取全部数据
-   * @return
-   * created by Tianxin on 2015年6月12日 上午11:45:06
-   */
-  List<ENTITY> findAll();
+public interface BaseStatDao<ENTITY> extends DaoAware<ENTITY>{
 
   /**
    * 查询出全部的结果
