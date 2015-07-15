@@ -6,7 +6,7 @@ package org.darwin.generic.sample.bo;
 
 import java.util.Date;
 
-import org.darwin.common.utils.GenericDaoUtils;
+import org.darwin.common.GenericDaoUtils;
 import org.darwin.generic.sample.dao.impl.CreativeDaoImpl;
 import org.darwin.genericDao.annotations.Table;
 import org.darwin.genericDao.dao.impl.GenericDao;

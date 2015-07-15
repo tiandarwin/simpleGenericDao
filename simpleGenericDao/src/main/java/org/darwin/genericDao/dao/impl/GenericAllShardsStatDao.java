@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.darwin.common.utils.GenericDaoUtils;
+import org.darwin.common.GenericDaoUtils;
 import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.annotations.StatType;
 import org.darwin.genericDao.annotations.Table;

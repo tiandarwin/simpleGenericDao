@@ -12,7 +12,8 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.List;
 
-import org.darwin.common.utils.GenericDaoUtils;
+import org.darwin.common.BaseObjectUtils;
+import org.darwin.common.GenericDaoUtils;
 import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.bo.BaseObject;
 import org.darwin.genericDao.dao.BaseDao;
@@ -167,7 +168,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
       return 0;
     }
 
-    List<KEY> ids = Utils.extractKeys(entities);
+    List<KEY> ids = BaseObjectUtils.extractKeys(entities);
     return delete(configKeeper.keyColumn(), ids);
   }
 

@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.darwin.common.utils.GenericDaoUtils;
+import org.darwin.common.GenericDaoUtils;
 import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.annotations.Sequence;
 import org.darwin.genericDao.annotations.Table;
