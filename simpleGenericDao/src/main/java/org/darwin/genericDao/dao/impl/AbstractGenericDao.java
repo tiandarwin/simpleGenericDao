@@ -5,6 +5,7 @@
 package org.darwin.genericDao.dao.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -19,6 +20,7 @@ import org.darwin.genericDao.mapper.ColumnMapper;
 import org.darwin.genericDao.operate.Matches;
 import org.darwin.genericDao.operate.Modifies;
 import org.darwin.genericDao.operate.Orders;
+import org.darwin.genericDao.operate.Replaces;
 import org.darwin.genericDao.query.Query;
 import org.darwin.genericDao.query.QueryDelete;
 import org.darwin.genericDao.query.QueryDistinctCount;
@@ -86,6 +88,33 @@ public class AbstractGenericDao<ENTITY> {
    * <br/>created by Tianxin on 2015年6月24日 下午5:49:40
    */
   public int create(Collection<ENTITY> entities) {
+    if(Utils.isEmpty(entities)){
+      return 0; 
+    }
+    
+    //如果不足分批，则直接插入
+    int maxBatchSize = 10000;
+    if(entities.size() <= maxBatchSize){
+      return createCore(entities);
+    }
+    
+    //每积攒一个批次执行一次 
+    int count = 0;
+    List<ENTITY> batch = new ArrayList<ENTITY>(maxBatchSize);
+    for(ENTITY e : entities){
+      batch.add(e);
+      if(batch.size() == maxBatchSize){
+        count += createCore(batch);
+        batch.clear();
+      }
+    }
+    
+    //剩余的执行一次
+    count += createCore(batch);
+    return count;
+  }
+  
+  protected int createCore(Collection<ENTITY> entities){
     if(Utils.isEmpty(entities)){
       return 0; 
     }
@@ -389,5 +418,10 @@ public class AbstractGenericDao<ENTITY> {
   public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
     
     this.jdbcTemplate = jdbcTemplate;
+  }
+  
+  protected void executeBySQL(String sql, Replaces replaces){
+    sql = replaces.execute(sql);
+    jdbcTemplate.update(sql);
   }
 }

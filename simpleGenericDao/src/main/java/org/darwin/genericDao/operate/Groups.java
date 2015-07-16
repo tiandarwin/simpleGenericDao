@@ -5,6 +5,7 @@
 package org.darwin.genericDao.operate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -58,6 +59,20 @@ public class Groups implements Operate {
    * <br/>created by Tianxin on 2015年7月3日 下午1:37:02
    */
   public static Groups some(String... columns) {
+    Groups groups = init();
+    for(String column : columns){
+      groups.groupBy(column);
+    }
+    return groups;
+  }
+  
+  /**
+   * 多个groupBy的方法
+   * @param columns
+   * @return
+   * <br/>created by Tianxin on 2015年7月3日 下午1:37:02
+   */
+  public static Groups some(Collection<String> columns) {
     Groups groups = init();
     for(String column : columns){
       groups.groupBy(column);
