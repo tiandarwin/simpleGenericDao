@@ -420,8 +420,8 @@ public class AbstractGenericDao<ENTITY> {
     this.jdbcTemplate = jdbcTemplate;
   }
   
-  protected void executeBySQL(String sql, Replaces replaces){
+  protected int executeBySQL(String sql, Replaces replaces){
     sql = replaces.execute(sql);
-    jdbcTemplate.update(sql);
+    return jdbcTemplate.update(sql);
   }
 }

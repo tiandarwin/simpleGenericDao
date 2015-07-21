@@ -30,4 +30,16 @@ public class CreativeDaoImpl extends GenericDao<Long, Creative> implements Creat
 	//planid=1 and unitid=3
 	//groupid=22 and unitid=-44
 	
+	public static void main(String[] args) {
+      new CreativeDaoImpl().findRecords();
+    }
+  /**
+   * 
+   * <br/>created by Tianxin on 2015年7月17日 下午12:28:10
+   */
+  private void findRecords() {
+    find(Matches.one("id", SQLParams.express("userid=from_user")));
+    
+  }
+	
 }

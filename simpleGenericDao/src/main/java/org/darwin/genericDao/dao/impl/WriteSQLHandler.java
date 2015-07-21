@@ -122,7 +122,7 @@ public class WriteSQLHandler<ENTITY> {
    */
   private List<Object> getParamsByColumns(List<String> columns, ENTITY entity) {
     ArrayList<Object> params = new ArrayList<Object>(columns.size() + 1);
-    for (String column : insertColumns) {
+    for (String column : columns) {
       try {
         ColumnMapper cMapper = columnMappers.get(column);
         Object value = cMapper.getGetter().invoke(entity);

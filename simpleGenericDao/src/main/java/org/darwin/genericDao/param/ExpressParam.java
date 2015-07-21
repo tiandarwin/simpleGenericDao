@@ -13,24 +13,24 @@ import java.util.List;
  * created by Tianxin on 2015年5月27日 下午2:07:49
  */
 public class ExpressParam implements Param {
-	
-	private String expression;
-	private Object[] params;
 
-	/**
-	 * @param value
-	 */
-	public ExpressParam(String expression, Object...params) {
-		this.expression = expression;
-		this.params = params;
-	}
+  private String expression;
+  private Object[] params;
 
-	public List<Object> getParams() {
-		return Arrays.asList(params);
-	}
+  /**
+   * @param value
+   */
+  public ExpressParam(String expression, Object... params) {
+    this.expression = expression;
+    this.params = params;
+  }
 
-	public String buildOperate(String column) {
-		return expression;
-	}
+  public List<Object> getParams() {
+    return Arrays.asList(params);
+  }
+
+  public String buildOperate(String column) {
+    return expression;
+  }
 
 }
