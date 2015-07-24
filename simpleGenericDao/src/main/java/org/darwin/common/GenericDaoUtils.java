@@ -302,13 +302,20 @@ public class GenericDaoUtils {
         continue;
       }
 
-      Class<?> fieldType = getter.getReturnType();
-      if (setter.getName().equals("setId") && BaseObject.class.isAssignableFrom(entityClass)) {
-        fieldType = getGenericEntityClass(entityClass, BaseObject.class, 0);
-      }
       Column column = fetchColumn(field, getter, setter, entityClass);
       StatType type = fetchColumnType(field, getter, setter, entityClass);
-      ColumnMapper columnMapper = new ColumnMapper(getter, setter, fieldType, column, columnStyle, type);
+      
+      Class<?> fieldType = getter.getReturnType();
+      String columnName = null;
+      if (setter.getName().equals("setId") && BaseObject.class.isAssignableFrom(entityClass)) {
+        fieldType = getGenericEntityClass(entityClass, BaseObject.class, 0);
+        
+        if(column == null){
+          Table table = GenericDaoUtils.getTable(entityClass);
+          columnName = table.keyColumn();
+        }
+      }
+      ColumnMapper columnMapper = new ColumnMapper(getter, setter, fieldType, column, columnStyle, type, columnName);
       columnMappers.put(columnMapper.getColumn(), columnMapper);
     }
 

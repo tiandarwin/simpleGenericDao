@@ -7,6 +7,8 @@ package org.darwin.genericDao.param;
 import java.util.Arrays;
 import java.util.List;
 
+import org.darwin.common.utils.Utils;
+
 /**
  * 表达式参数，一些复杂的需求很难提前对象化，用这个来表达。
  * 例如 expression 设置为 style=(status*2+style-?)
@@ -30,7 +32,11 @@ public class ExpressParam implements Param {
   }
 
   public String buildOperate(String column) {
-    return expression;
+    if(column == null || column.length() == 0){
+      return expression;
+    }else{
+      return Utils.connect(column, '=', expression);
+    }
   }
 
 }
