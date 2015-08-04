@@ -84,7 +84,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     // 如果id不为null，则直接插入即可
     if (entity.getId() != null) {
       LOG.info(Utils.toLogSQL(sql, params));
-      return jdbcTemplate.update(sql, params) >= 1;
+      return executeBySQL(sql, params) >= 1;
     }
 
     // ID为null时，执行插入操作同时要获取插入的key
@@ -136,7 +136,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     // 只是将insert替换成replace就变成了replace的SQL语句
     sql = sql.replaceFirst("insert", "replace");
     LOG.info(Utils.toLogSQL(sql, params));
-    return jdbcTemplate.update(sql, params);
+    return executeBySQL(sql, params);
   }
 
   /**
@@ -204,7 +204,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     Object[] params = writeHandler.generateUpdateParams(entity);
     
     LOG.info(Utils.toLogSQL(sql, params));
-    return jdbcTemplate.update(sql, params) >= 1;
+    return executeBySQL(sql, params) >= 1;
   }
 
   /**

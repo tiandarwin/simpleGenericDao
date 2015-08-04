@@ -10,14 +10,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.darwin.common.GenericDaoUtils;
 import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.annotations.StatType;
 import org.darwin.genericDao.annotations.enums.Type;
 import org.darwin.genericDao.dao.BaseStatDao;
-import org.darwin.genericDao.mapper.BasicMappers;
 import org.darwin.genericDao.mapper.ColumnMapper;
-import org.darwin.genericDao.mapper.EntityMapper;
 import org.darwin.genericDao.operate.Groups;
 import org.darwin.genericDao.operate.Matches;
 import org.darwin.genericDao.operate.Orders;
@@ -119,8 +116,8 @@ public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implement
    * @param orders
    * @return created by Tianxin on 2015年6月4日 下午8:23:27
    */
-  public <R> List<R> statOneColumnByMgo(Matches matches, Groups groups, Orders orders, String column, Class<R> rClass) {
-    return statPageOneColumnByMgo(matches, groups, orders, column, rClass, 0, 0);
+  public <E> List<E> statOneColumnByMgo(Matches matches, Groups groups, Orders orders, String column, Class<E> eClass) {
+    return statPageOneColumnByMgo(matches, groups, orders, column, eClass, 0, 0);
   }
   
   /**
@@ -131,12 +128,12 @@ public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implement
    * @param orders
    * @return created by Tianxin on 2015年6月4日 下午8:23:27
    */
-  public <R> List<R> statPageOneColumnByMgo(Matches matches, Groups groups, Orders orders, String column, Class<R> rClass, int offset, int rows) {
+  public <E> List<E> statPageOneColumnByMgo(Matches matches, Groups groups, Orders orders, String column, Class<E> eClass, int offset, int rows) {
     QueryStat query = new QueryStat( Arrays.asList(column), matches, groups, orders, configKeeper.table(), offset, rows);
     String sql = query.getSQL();
     Object[] params = query.getParams();
     LOG.info(Utils.toLogSQL(sql, params));
-    return jdbcTemplate.query(sql, params, BasicMappers.getMapper(rClass));
+    return findBySQL(eClass, sql, params);
   }
 
   /**
@@ -183,13 +180,10 @@ public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implement
    * @param query
    * @return created by Tianxin on 2015年6月3日 下午4:06:19
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
   protected List<ENTITY> statByQuery(QueryStat query) {
     String sql = query.getSQL();
     Object[] params = query.getParams();
-    List<String> columns = GenericDaoUtils.getColumnsFromSQL(sql);
-    LOG.info(Utils.toLogSQL(sql, params));
-    return jdbcTemplate.query(sql, params, new EntityMapper(columns, columnMappers, entityClass));
+    return findBySQL(entityClass, sql, params);
   }
 
   /**

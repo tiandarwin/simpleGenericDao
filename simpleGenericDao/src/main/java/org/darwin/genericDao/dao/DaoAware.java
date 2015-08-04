@@ -38,5 +38,19 @@ public interface DaoAware<ENTITY>{
    * created by Tianxin on 2015年5月26日 下午9:19:16
    */
   int countAll();
+  
+  /**
+   * 删除该表的所有记录
+   * @return
+   * <br/>created by Tianxin on 2015年8月4日 上午11:12:35
+   */
+  int deleteAll();
+  
+  /**
+   * 清空该表
+   * 
+   * <br/>created by Tianxin on 2015年8月4日 上午11:12:49
+   */
+  void truncate();
 
 }
