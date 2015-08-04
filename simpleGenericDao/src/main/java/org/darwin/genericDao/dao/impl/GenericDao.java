@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -261,7 +262,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
    */
   public List<ENTITY> get(Collection<KEY> ids) {
     if (ids == null || ids.size() == 0) {
-      return null;
+      return new ArrayList<ENTITY>(0);
     }
     return find(configKeeper.keyColumn(), ids);
   }

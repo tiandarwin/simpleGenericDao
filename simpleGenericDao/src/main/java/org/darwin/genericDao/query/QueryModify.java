@@ -14,8 +14,8 @@ import org.darwin.genericDao.operate.Modifies;
  * created by Tianxin on 2015年5月27日 下午1:51:51
  */
 public class QueryModify implements Query {
-	
-	private QueryModify() {
+
+  private QueryModify() {
 	}
 	
 	/**
@@ -24,15 +24,26 @@ public class QueryModify implements Query {
 	 * @param table
 	 */
 	public QueryModify(Modifies modifies, Matches matches, String table) {
-		this();
-		this.modifies = modifies;
-		this.matches = matches;
-		this.table = table;
+	  this();
+	  this.modifies = modifies;
+	  this.matches = matches;
+	  this.table = table;
+	}
+	
+	/**
+	 * 构造一个modify的Query
+	 * @param matches
+	 * @param table
+	 */
+	public QueryModify(Modifies modifies, Matches matches, String table, int rows) {
+		this(modifies, matches, table);
+		this.rows = rows;
 	}
 	
 	private Modifies modifies;
 	private Matches matches;
 	private String table;
+    private int rows;
 
 	public String getSQL() {
 		StringBuilder sb = new StringBuilder(512);
@@ -40,6 +51,10 @@ public class QueryModify implements Query {
 		sb.append(modifies.getOperate());
 		if(matches != null && !matches.isEmpty()){
 			sb.append(" where ").append(matches.getOperate());
+		}
+		
+		if(rows > 0){
+		  sb.append(" limit ").append(rows);
 		}
 		return sb.toString();
 	}
