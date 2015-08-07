@@ -26,6 +26,28 @@ public class FetcherCache {
   public final static boolean contains(Class<?> typeClass) {
     return cache.containsKey(typeClass);
   }
+  
+  /**
+   * trim掉label周边的无用字符
+   * @param label
+   * @return
+   * <br/>created by Tianxin on 2015年8月7日 下午4:06:42
+   */
+  public final static String trimColumnLabel(String label){
+    char space = ' ', point = '`';
+    if(label.indexOf(space) < 0 && label.indexOf(point) < 0){
+      return label;
+    }
+    
+    StringBuilder sb = new StringBuilder(trimColumnLabel(label));
+    for(char c : label.toCharArray()){
+      if(c == point || c == space){
+        continue;
+      }
+      sb.append(c);
+    }
+    return sb.toString();
+  }
 
   /**
    * 获取某个类型的fetcher，如果没有匹配的matcher则当成object来返回
@@ -40,7 +62,7 @@ public class FetcherCache {
 
   private static TypeFetcher objectFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getObject(label);
+      return rs.getObject(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -49,7 +71,7 @@ public class FetcherCache {
   };
   private static TypeFetcher integerFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getInt(label);
+      return rs.getInt(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -58,7 +80,7 @@ public class FetcherCache {
   };
   private static TypeFetcher longFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getLong(label);
+      return rs.getLong(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -67,7 +89,7 @@ public class FetcherCache {
   };
   private static TypeFetcher shortFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getShort(label);
+      return rs.getShort(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -76,7 +98,7 @@ public class FetcherCache {
   };
   private static TypeFetcher floatFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getFloat(label);
+      return rs.getFloat(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -85,7 +107,7 @@ public class FetcherCache {
   };
   private static TypeFetcher doubleFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getDouble(label);
+      return rs.getDouble(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -94,7 +116,7 @@ public class FetcherCache {
   };
   private static TypeFetcher byteFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getByte(label);
+      return rs.getByte(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -103,7 +125,7 @@ public class FetcherCache {
   };
   private static TypeFetcher booleanFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getBoolean(label);
+      return rs.getBoolean(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -112,7 +134,7 @@ public class FetcherCache {
   };
   private static TypeFetcher stringFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getString(label);
+      return rs.getString(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -121,7 +143,7 @@ public class FetcherCache {
   };
   private static TypeFetcher dateFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getDate(label);
+      return rs.getDate(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -130,7 +152,7 @@ public class FetcherCache {
   };
   private static TypeFetcher timestampFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getTimestamp(label);
+      return rs.getTimestamp(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -139,7 +161,7 @@ public class FetcherCache {
   };
   private static TypeFetcher timeFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getTime(label);
+      return rs.getTime(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -148,7 +170,7 @@ public class FetcherCache {
   };
   private static TypeFetcher bigDecimalFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getBigDecimal(label);
+      return rs.getBigDecimal(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -157,7 +179,7 @@ public class FetcherCache {
   };
   private static TypeFetcher urlFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getURL(label);
+      return rs.getURL(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -166,7 +188,7 @@ public class FetcherCache {
   };
   private static TypeFetcher clobFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getClob(label);
+      return rs.getClob(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -175,7 +197,7 @@ public class FetcherCache {
   };
   private static TypeFetcher blobFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getBlob(label);
+      return rs.getBlob(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -184,7 +206,7 @@ public class FetcherCache {
   };
   private static TypeFetcher arrayFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getArray(label);
+      return rs.getArray(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -193,7 +215,7 @@ public class FetcherCache {
   };
   protected static TypeFetcher asciiStreamFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getAsciiStream(label);
+      return rs.getAsciiStream(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -202,7 +224,7 @@ public class FetcherCache {
   };
   protected static TypeFetcher binaryStreamFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getBinaryStream(label);
+      return rs.getBinaryStream(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -211,7 +233,7 @@ public class FetcherCache {
   };
   protected static TypeFetcher characterStreamFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getCharacterStream(label);
+      return rs.getCharacterStream(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -220,7 +242,7 @@ public class FetcherCache {
   };
   protected static TypeFetcher nCharacterStreamFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getNCharacterStream(label);
+      return rs.getNCharacterStream(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -229,7 +251,7 @@ public class FetcherCache {
   };
   protected static TypeFetcher nClobFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getNClob(label);
+      return rs.getNClob(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -238,7 +260,7 @@ public class FetcherCache {
   };
   protected static TypeFetcher nStringFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getNString(label);
+      return rs.getNString(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -247,7 +269,7 @@ public class FetcherCache {
   };
   protected static TypeFetcher refFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getRef(label);
+      return rs.getRef(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -256,7 +278,7 @@ public class FetcherCache {
   };
   protected static TypeFetcher rowIdFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getRowId(label);
+      return rs.getRowId(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -265,7 +287,7 @@ public class FetcherCache {
   };
   protected static TypeFetcher sqlXMLFetcher = new TypeFetcher() {
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getSQLXML(label);
+      return rs.getSQLXML(trimColumnLabel(label));
     }
 
     public Object getFromResultSet(ResultSet rs, int index) throws SQLException {
@@ -275,7 +297,7 @@ public class FetcherCache {
   protected static TypeFetcher unicodeStreamFetcher = new TypeFetcher() {
     @SuppressWarnings("deprecation")
     public Object getFromResultSet(ResultSet rs, String label) throws SQLException {
-      return rs.getUnicodeStream(label);
+      return rs.getUnicodeStream(trimColumnLabel(label));
     }
 
     @SuppressWarnings("deprecation")
