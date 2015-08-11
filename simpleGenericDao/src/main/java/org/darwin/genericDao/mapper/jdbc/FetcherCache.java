@@ -39,7 +39,7 @@ public class FetcherCache {
       return label;
     }
     
-    StringBuilder sb = new StringBuilder(trimColumnLabel(label));
+    StringBuilder sb = new StringBuilder();
     for(char c : label.toCharArray()){
       if(c == point || c == space){
         continue;
