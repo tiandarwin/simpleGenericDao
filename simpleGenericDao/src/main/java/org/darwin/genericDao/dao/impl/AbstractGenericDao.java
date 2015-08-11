@@ -15,6 +15,7 @@ import org.darwin.common.GenericDaoUtils;
 import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.annotations.Sequence;
 import org.darwin.genericDao.annotations.Table;
+import org.darwin.genericDao.annotations.enums.ColumnBuilder;
 import org.darwin.genericDao.mapper.BasicMappers;
 import org.darwin.genericDao.mapper.ColumnMapper;
 import org.darwin.genericDao.operate.Matches;
@@ -352,6 +353,18 @@ public class AbstractGenericDao<ENTITY> {
   protected <E extends Serializable> List<E> findOneColumn(Class<E> eClass, Matches matches, String column) {
     return pageOneColumn(eClass, matches, null, column, 0, 0);
   }
+  
+  /**
+   * 查询某一列，并且用distinct做排重
+   * 
+   * @param eClass 结果类型
+   * @param matches 匹配条件，可为null
+   * @param column 获取哪一列
+   * @return created by Tianxin on 2015年6月3日 下午8:47:59
+   */
+  protected <E extends Serializable> List<E> findDistinctOneColumn(Class<E> eClass, Matches matches, String column) {
+    return pageOneColumn(eClass, matches, null, "distinct " + column, 0, 0);
+  }
 
   /**
    * 分页查询某一列
@@ -494,4 +507,10 @@ public class AbstractGenericDao<ENTITY> {
     String sql = "truncate table " + configKeeper.table();
     executeBySQL(sql);
   }
+  
+  //方便引用的字段builder
+  protected final static ColumnBuilder MAX = ColumnBuilder.MAX;
+  protected final static ColumnBuilder MIN = ColumnBuilder.MIN;
+  protected final static ColumnBuilder SUM = ColumnBuilder.SUM;
+  protected final static ColumnBuilder AVG = ColumnBuilder.AVG;
 }
