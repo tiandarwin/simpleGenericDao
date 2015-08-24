@@ -132,6 +132,23 @@ public class AbstractGenericDao<ENTITY> {
   }
   
   /**
+   * 执行insert动作的操作
+   * @param entities
+   * @param type 0为普通，1为replace，2为insert ignore
+   * @return
+   * <br/>created by Tianxin on 2015年8月4日 上午11:01:01
+   */
+  protected int createCore(Collection<ENTITY> entities, int type){
+    if(Utils.isEmpty(entities)){
+      return 0; 
+    }
+    String sql = writeHandler.generateInsertSQL(entities, type);
+    Object[] args = writeHandler.generateInsertParams(entities);
+    LOG.info(Utils.toLogSQL(sql, args));
+    return executeBySQL(sql, args);
+  }
+  
+  /**
    * 如果column的取值match到了value则进行删除
    * 
    * @param column 字段名
@@ -255,6 +272,30 @@ public class AbstractGenericDao<ENTITY> {
       return null;
     }
     return entities.get(0);
+  }
+  
+  /**
+   * 获取符合匹配条件的按orders排序后的第一调数据
+   * 
+   * @param matches 匹配条件，可为null
+   * @param orders 排序规则，可为null
+   * @return created by Tianxin on 2015年6月3日 下午8:46:29
+   */
+  protected <E> E findOne(Class<E> eclass, Matches matches, Orders orders, String...columns) {
+    
+    List<String> choozenColumns = Arrays.asList(columns);
+    QuerySelect query = new QuerySelect(choozenColumns, matches, orders, configKeeper.table(), 0, 1);
+    
+    String sql = query.getSQL();
+    Object[] params = query.getParams();
+    LOG.info(Utils.toLogSQL(sql, params));
+    
+    List<E> es = findBySQL(eclass, sql, params);
+    if(es == null || es.size() == 0){
+      return null;
+    }else{
+      return es.get(0);
+    }
   }
 
   /**
@@ -495,6 +536,7 @@ public class AbstractGenericDao<ENTITY> {
    * <br/>created by Tianxin on 2015年8月4日 上午11:06:19
    */
   protected int executeBySQL(String sql, Object...args){
+    LOG.info(Utils.toLogSQL(sql, args));
     return jdbcTemplate.update(sql, args);
   }
   

@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.darwin.common.BaseObjectUtils;
@@ -126,33 +125,13 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
    * replace操作
    */
   public int replace(Collection<ENTITY> entities) {
-    if (entities == null) {
-      return 0;
-    }
-
-    // 获取sql以及参数
-    String sql = writeHandler.generateInsertSQL(entities);
-    Object[] params = writeHandler.generateInsertParams(entities);
-
-    // 只是将insert替换成replace就变成了replace的SQL语句
-    sql = sql.replaceFirst("insert", "replace");
-    LOG.info(Utils.toLogSQL(sql, params));
-    return executeBySQL(sql, params);
+   return createCore(entities, 1);
   }
   
   public boolean replace(ENTITY entity) {
-    if (entity == null) {
-      return false;
-    }
-    
-    // 获取sql以及参数
-    String sql = writeHandler.generateInsertSQL(Collections.singleton(entity));
-    Object[] params = writeHandler.generateInsertParams(Collections.singleton(entity));
-    
-    // 只是将insert替换成replace就变成了replace的SQL语句
-    sql = sql.replaceFirst("insert", "replace");
-    LOG.info(Utils.toLogSQL(sql, params));
-    return executeBySQL(sql, params) == 1;
+    List<ENTITY> list = new ArrayList<ENTITY>(1); 
+    list.add(entity);
+    return createCore(list, 1) == 1;
   }
 
   /**

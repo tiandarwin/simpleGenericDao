@@ -140,8 +140,25 @@ public class WriteSQLHandler<ENTITY> {
    * @return created by Tianxin on 2015年5月27日 下午7:44:14
    */
   public String generateInsertSQL(Collection<ENTITY> entities) {
+    return generateInsertSQL(entities, 0);
+  }
+
+  /**
+   * 生成insert语句
+   * @param entities
+   * @param type 0为普通,1为replace,2为insert ignore
+   * 
+   * @return created by Tianxin on 2015年5月27日 下午7:44:14
+   */
+  public String generateInsertSQL(Collection<ENTITY> entities, int type) {
+
+    String[] operates = new String[] {"insert", "replace", "insert ignore"};
+    if (type >= operates.length || type < 0) {
+      throw new RuntimeException("不是合法的type!");
+    }
+
     StringBuilder sb = new StringBuilder(512);
-    sb.append("insert into ").append(table());
+    sb.append(operates[type]).append("into ").append(table());
     sb.append(' ').append(sInsertColumns).append(" values ");
     for (ENTITY entity : entities) {
       if (entity != null) {
@@ -158,12 +175,12 @@ public class WriteSQLHandler<ENTITY> {
    * @return created by Tianxin on 2015年5月27日 下午7:42:28
    */
   public Object[] generateUpdateParams(ENTITY entity) {
-    if(entity instanceof BaseObject<?>){
+    if (entity instanceof BaseObject<?>) {
       List<Object> params = getParamsByColumns(updateColumns, entity);
-      params.add(((BaseObject<?>)entity).getId());
+      params.add(((BaseObject<?>) entity).getId());
       return params.toArray();
     }
-    
+
     throw new RuntimeException(Utils.connect(entity.getClass().getSimpleName(), " 不是BaseObject的子类!"));
   }
 
