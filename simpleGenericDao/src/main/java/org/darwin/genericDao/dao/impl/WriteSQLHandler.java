@@ -158,7 +158,7 @@ public class WriteSQLHandler<ENTITY> {
     }
 
     StringBuilder sb = new StringBuilder(512);
-    sb.append(operates[type]).append("into ").append(table());
+    sb.append(operates[type]).append(" into ").append(table());
     sb.append(' ').append(sInsertColumns).append(" values ");
     for (ENTITY entity : entities) {
       if (entity != null) {
