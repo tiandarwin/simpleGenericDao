@@ -5,8 +5,11 @@
 package org.darwin.genericDao.operate;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.darwin.common.utils.DateUtils;
+import org.darwin.common.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +46,30 @@ public class Replaces {
       this.label = label;
       this.value = value;
     }
+    /**
+     * 获取当前value的数据库值
+     * @return
+     * <br/>created by Tianxin on 2015年8月26日 下午4:04:38
+     */
+    public String value() {
+      if(value == null){
+        return String.valueOf(value);
+      }
+      
+      if(value instanceof Date){
+        return Utils.connect('\'', DateUtils.format((Date)value), '\'');
+      }
+      
+      if(value instanceof String){
+        return Utils.connect('\'', value, '\'');
+      }
+      
+      if(value instanceof Boolean){
+        return ((Boolean)value) ? "1" : "0";
+      }
+      
+      return String.valueOf(value);
+    }
   }
   
   public static Logger getLog() {
@@ -62,7 +89,7 @@ public class Replaces {
    */
   public String execute(String sql) {
     for(Replace r : list){
-      sql = sql.replaceAll(r.label, String.valueOf(r.value));
+      sql = sql.replaceAll(r.label, r.value());
     }
     return sql;
   }
