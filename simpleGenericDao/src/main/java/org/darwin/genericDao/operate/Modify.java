@@ -6,6 +6,7 @@ package org.darwin.genericDao.operate;
 
 import java.util.List;
 
+import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.param.Param;
 import org.darwin.genericDao.param.SQLParams;
 
@@ -32,7 +33,7 @@ public class Modify implements Operate {
 	private Param param;
 	
 	public String getOperate() {
-		return param.buildOperate(column);
+		return Utils.connect(column, "=?");
 	}
 	public List<Object> getParams() {
 		return param.getParams();

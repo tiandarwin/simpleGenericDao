@@ -61,7 +61,11 @@ public class Replaces {
       }
       
       if(value instanceof String){
-        return Utils.connect('\'', value, '\'');
+        if(label.equals("#table")){
+          return String.valueOf(value);
+        }else{
+          return Utils.connect('\'', value, '\'');
+        }
       }
       
       if(value instanceof Boolean){
