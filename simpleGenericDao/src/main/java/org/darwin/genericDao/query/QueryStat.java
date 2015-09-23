@@ -145,4 +145,8 @@ public class QueryStat implements Query {
     }
   }
 
+  public Matches getMatches() {
+    return matches;
+  }
+
 }

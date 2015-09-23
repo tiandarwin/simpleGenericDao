@@ -27,6 +27,7 @@ import org.darwin.genericDao.query.QueryDelete;
 import org.darwin.genericDao.query.QueryDistinctCount;
 import org.darwin.genericDao.query.QueryModify;
 import org.darwin.genericDao.query.QuerySelect;
+import org.darwin.genericDao.query.QueryStat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -426,6 +427,12 @@ public class AbstractGenericDao<ENTITY> {
   }
   
   protected List<ENTITY> find(Query query){
+    if(query instanceof QueryStat){
+      ENTITY first = findOne(((QueryStat)query).getMatches());
+      if(first == null){
+        return new ArrayList<ENTITY>(0);
+      }
+    }
     return find(query, entityClass);
   }
 

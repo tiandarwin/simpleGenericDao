@@ -15,55 +15,54 @@ import org.darwin.genericDao.operate.Modifies;
  */
 public class QueryModify implements Query {
 
-  private QueryModify() {
-	}
-	
-	/**
-	 * 构造一个modify的Query
-	 * @param matches
-	 * @param table
-	 */
-	public QueryModify(Modifies modifies, Matches matches, String table) {
-	  this();
-	  this.modifies = modifies;
-	  this.matches = matches;
-	  this.table = table;
-	}
-	
-	/**
-	 * 构造一个modify的Query
-	 * @param matches
-	 * @param table
-	 */
-	public QueryModify(Modifies modifies, Matches matches, String table, int rows) {
-		this(modifies, matches, table);
-		this.rows = rows;
-	}
-	
-	private Modifies modifies;
-	private Matches matches;
-	private String table;
-    private int rows;
+  private QueryModify() {}
 
-	public String getSQL() {
-		StringBuilder sb = new StringBuilder(512);
-		sb.append("update ").append(table).append(" set ");
-		sb.append(modifies.getOperate());
-		if(matches != null && !matches.isEmpty()){
-			sb.append(" where ").append(matches.getOperate());
-		}
-		
-		if(rows > 0){
-		  sb.append(" limit ").append(rows);
-		}
-		return sb.toString();
-	}
+  /**
+   * 构造一个modify的Query
+   * @param matches
+   * @param table
+   */
+  public QueryModify(Modifies modifies, Matches matches, String table) {
+    this();
+    this.modifies = modifies;
+    this.matches = matches;
+    this.table = table;
+  }
 
-	public Object[] getParams() {
-		List<Object> params = modifies.getParams();
-		if(matches != null && !matches.isEmpty()){
-			params.addAll(matches.getParams());
-		}
-		return params.toArray();
-	}
+  /**
+   * 构造一个modify的Query
+   * @param matches
+   * @param table
+   */
+  public QueryModify(Modifies modifies, Matches matches, String table, int rows) {
+    this(modifies, matches, table);
+    this.rows = rows;
+  }
+
+  private Modifies modifies;
+  private Matches matches;
+  private String table;
+  private int rows;
+
+  public String getSQL() {
+    StringBuilder sb = new StringBuilder(512);
+    sb.append("update ").append(table).append(" set ");
+    sb.append(modifies.getOperate());
+    if (matches != null && !matches.isEmpty()) {
+      sb.append(" where ").append(matches.getOperate());
+    }
+
+    if (rows > 0) {
+      sb.append(" limit ").append(rows);
+    }
+    return sb.toString();
+  }
+
+  public Object[] getParams() {
+    List<Object> params = modifies.getParams();
+    if (matches != null && !matches.isEmpty()) {
+      params.addAll(matches.getParams());
+    }
+    return params.toArray();
+  }
 }
