@@ -149,4 +149,29 @@ public class QueryStat implements Query {
     return matches;
   }
 
+  /**
+   * 看是否需要检查数量
+   * @return
+   * <br/>created by Tianxin on 2015年9月24日 上午11:23:43
+   */
+  public boolean need2CheckCount(){
+    
+    //有group by时候不需要check总的符合条件数量
+    boolean hasGroups = groups != null && !groups.isEmpty();
+    if(hasGroups){
+      return false;
+    }
+    
+    //没有group by时，并且字段中有sum，min，max，avg等
+    String[] operates = new String[]{"min(", "max(", "sum(", "avg("}; 
+    for(String column : columns){
+      column = column.toLowerCase();
+      for(String operate : operates){
+        if(column.startsWith(operate)){
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 }

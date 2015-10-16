@@ -427,16 +427,41 @@ public class AbstractGenericDao<ENTITY> {
   }
   
   protected List<ENTITY> find(Query query){
-    if(query instanceof QueryStat){
-      ENTITY first = findOne(((QueryStat)query).getMatches());
-      if(first == null){
-        return new ArrayList<ENTITY>(0);
-      }
-    }
     return find(query, entityClass);
   }
+  
+  /**
+   * 如果是没有group by的统计SQL，且where条件没有任何匹配，则query
+   * @param query
+   * @param eClass
+   * @return
+   * <br/>created by Tianxin on 2015年9月24日 上午11:12:24
+   */
+  protected <E> List<E> findByStatQuery(QueryStat query, Class<E> eClass, boolean checkCount){
+    
+    //一个统计SQL没有groupBy，并且有sum avg count max min这些统计函数时，则需要判断数量
+    if(checkCount){
+      ENTITY first = findOne((query).getMatches());
+      if(first == null){
+        return new ArrayList<E>(0);
+      }
+    }
+    
+    String sql = query.getSQL();
+    Object[] params = query.getParams();
+    LOG.info(Utils.toLogSQL(sql, params));
+    return findBySQL(eClass, sql, params);
+  }
 
+  /**
+   * 如果是没有group by的统计SQL，且where条件没有任何匹配，则query
+   * @param query
+   * @param eClass
+   * @return
+   * <br/>created by Tianxin on 2015年9月24日 上午11:12:24
+   */
   protected <E> List<E> find(Query query, Class<E> eClass){
+    
     String sql = query.getSQL();
     Object[] params = query.getParams();
     LOG.info(Utils.toLogSQL(sql, params));
