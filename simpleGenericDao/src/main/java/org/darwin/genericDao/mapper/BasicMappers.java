@@ -6,6 +6,7 @@ package org.darwin.genericDao.mapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,22 @@ public class BasicMappers {
   private static Map<Class<?>, Map<String, ColumnMapper>> columnMappersMap = Utils.newMap(64);
 
   private static Map<Class<?>, Class<?>> entityKeyClassMap = Utils.newMap(16);
+  
+  public static <ENTITY> List<ColumnMapper> getMappers(Class<?> entityClass) {
+    
+    //object截止
+    if(entityClass.equals(Object.class)){
+      return null;
+    }
+    
+    Map<String, ColumnMapper> mappers = columnMappersMap.get(entityClass);
+    if(mappers == null){
+      entityClass = entityClass.getSuperclass();
+      return getMappers(entityClass);
+    }else {
+      return new ArrayList<ColumnMapper>(mappers.values());
+    }
+  }
 
   /**
    * 获取一个实体类的主键类型
