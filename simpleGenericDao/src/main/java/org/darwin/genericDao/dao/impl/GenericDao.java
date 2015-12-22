@@ -82,7 +82,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     final Object[] params = writeHandler.generateInsertParams(entities);
 
     // 如果id不为null，则直接插入即可
-    if (entity.getId() != null) {
+    if (entity.getId() != null && !entity.getId().toString().equals("0")) {
       LOG.info(Utils.toLogSQL(sql, params));
       return executeBySQL(sql, params) >= 1;
     }
