@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.darwin.genericDao.bo.BaseObject;
+import org.darwin.genericDao.dao.TableAware;
 import org.darwin.genericDao.mapper.ColumnMapper;
 
 /**
@@ -27,10 +28,10 @@ public class QueryHandler<KEY extends Serializable, ENTITY extends BaseObject<KE
 	 * @param columnMappers
 	 * @param configKeeper
 	 */
-	public QueryHandler(Map<String, ColumnMapper> columnMappers, TableConfigKeeper configKeeper) {
+	public QueryHandler(Map<String, ColumnMapper> columnMappers, TableAware tableAware) {
 		
 		this();
-		this.tableGenerator = configKeeper;
+		this.tableGenerator = tableAware;
 		this.columnMappers = columnMappers;
 		
 		int mapperCount = columnMappers.size();
@@ -88,7 +89,7 @@ public class QueryHandler<KEY extends Serializable, ENTITY extends BaseObject<KE
 	private String sInsertColumns;
 
 	private Map<String, ColumnMapper> columnMappers;
-	private TableConfigKeeper tableGenerator;
+	private TableAware tableGenerator;
 
 	/**
 	 * @return created by Tianxin on 2015年5月27日 下午6:47:12

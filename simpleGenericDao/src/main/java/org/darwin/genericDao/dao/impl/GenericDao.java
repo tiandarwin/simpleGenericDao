@@ -141,7 +141,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     if (id == null) {
       return false;
     }
-    return delete(configKeeper.keyColumn(), id) > 0;
+    return delete(keyColumn(), id) > 0;
   }
 
   /**
@@ -165,7 +165,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     }
 
     List<KEY> ids = BaseObjectUtils.extractKeys(entities);
-    return delete(configKeeper.keyColumn(), ids);
+    return delete(keyColumn(), ids);
   }
 
   /**
@@ -175,7 +175,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     if (ids == null || ids.size() == 0) {
       return 0;
     }
-    return delete(configKeeper.keyColumn(), ids);
+    return delete(keyColumn(), ids);
   }
 
   /**
@@ -185,7 +185,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     if (ids == null || ids.length == 0) {
       return 0;
     }
-    return delete(configKeeper.keyColumn(), ids);
+    return delete(keyColumn(), ids);
   }
 
   /**
@@ -245,7 +245,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     if (id == null) {
       return null;
     }
-    List<ENTITY> entities = find(configKeeper.keyColumn(), id);
+    List<ENTITY> entities = find(keyColumn(), id);
     if (entities == null || entities.size() == 0) {
       return null;
     }
@@ -259,7 +259,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     if (ids == null || ids.size() == 0) {
       return new ArrayList<ENTITY>(0);
     }
-    return find(configKeeper.keyColumn(), ids);
+    return find(keyColumn(), ids);
   }
 
 }

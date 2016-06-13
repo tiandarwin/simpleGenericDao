@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.bo.BaseObject;
+import org.darwin.genericDao.dao.TableAware;
 import org.darwin.genericDao.mapper.ColumnMapper;
 
 /**
@@ -26,10 +27,10 @@ public class WriteSQLHandler<ENTITY> {
    * @param columnMappers
    * @param configKeeper
    */
-  public WriteSQLHandler(Map<String, ColumnMapper> columnMappers, TableConfigKeeper configKeeper) {
+  public WriteSQLHandler(Map<String, ColumnMapper> columnMappers, TableAware tableAware) {
 
     this();
-    this.tableGenerator = configKeeper;
+    this.tableAware = tableAware;
     this.columnMappers = columnMappers;
 
     int mapperCount = columnMappers.size();
@@ -87,14 +88,8 @@ public class WriteSQLHandler<ENTITY> {
   private String sInsertColumns;
 
   private Map<String, ColumnMapper> columnMappers;
-  private TableConfigKeeper tableGenerator;
+  private TableAware tableAware;
 
-  /**
-   * @return created by Tianxin on 2015年5月27日 下午6:47:12
-   */
-  public String table() {
-    return tableGenerator.table();
-  }
 
   /**
    * 获取insert时的参数列表
@@ -158,7 +153,7 @@ public class WriteSQLHandler<ENTITY> {
     }
 
     StringBuilder sb = new StringBuilder(512);
-    sb.append(operates[type]).append(" into ").append(table());
+    sb.append(operates[type]).append(" into ").append(tableAware.table());
     sb.append(' ').append(sInsertColumns).append(" values ");
     for (ENTITY entity : entities) {
       if (entity != null) {
@@ -191,12 +186,12 @@ public class WriteSQLHandler<ENTITY> {
    */
   public String generateUpdateSQL(ENTITY entity) {
     StringBuilder sb = new StringBuilder(512);
-    sb.append("update ").append(table()).append(" set ");
+    sb.append("update ").append(tableAware.table()).append(" set ");
     for (String column : updateColumns) {
       sb.append(column).append("=?,");
     }
     sb.setCharAt(sb.length() - 1, ' ');
-    sb.append(" where ").append(tableGenerator.keyColumn()).append("=?");
+    sb.append(" where ").append(tableAware.keyColumn()).append("=?");
     return sb.toString();
   }
 

@@ -12,10 +12,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.darwin.common.GenericDaoUtils;
+import org.darwin.common.ThreadContext;
 import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.annotations.Sequence;
 import org.darwin.genericDao.annotations.Table;
 import org.darwin.genericDao.annotations.enums.ColumnBuilder;
+import org.darwin.genericDao.dao.TableAware;
 import org.darwin.genericDao.mapper.BasicMappers;
 import org.darwin.genericDao.mapper.ColumnMapper;
 import org.darwin.genericDao.operate.Matches;
@@ -36,7 +38,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * 虚拟的通用dao
  * <br/>created by Tianxin on 2015年6月24日 下午5:33:04
  */
-public class AbstractGenericDao<ENTITY> {
+public class AbstractGenericDao<ENTITY> implements TableAware{
   /**
    * 默认生成的该类的LOG记录器，使用slf4j组件。避免产生编译警告，使用protected修饰符。
    */
@@ -49,28 +51,36 @@ public class AbstractGenericDao<ENTITY> {
     
     Class<ENTITY> entityClass = GenericDaoUtils.getGenericEntityClass(this.getClass(), AbstractGenericDao.class, 0);
     
-    Table table = GenericDaoUtils.getTable(entityClass);
-    Sequence sequence = GenericDaoUtils.getSequence(entityClass);
+    table = GenericDaoUtils.getTable(entityClass);
+    seqConfig = GenericDaoUtils.getSequence(entityClass);
 
     this.entityClass = entityClass;
-    this.configKeeper = new TableConfigKeeper(table, sequence);
     this.columnMappers = GenericDaoUtils.generateColumnMappers(entityClass, table.columnStyle());
-    this.writeHandler = new WriteSQLHandler<ENTITY>(columnMappers, configKeeper);
+    this.writeHandler = new WriteSQLHandler<ENTITY>(columnMappers, this);
   }
   
-  protected JdbcTemplate jdbcTemplate;
   protected Class<ENTITY> entityClass;
-  protected TableConfigKeeper configKeeper;
+  protected JdbcTemplate jdbcTemplate;
   protected WriteSQLHandler<ENTITY> writeHandler;
   protected Map<String, ColumnMapper> columnMappers;
   
-  /**
-   * 获取表名
-   * 
-   * @return created by Tianxin on 2015年6月4日 下午2:29:52
-   */
-  protected String table() {
-    return configKeeper.table();
+  private Table table;
+  protected Sequence seqConfig;
+  
+  public String table() {
+    Object shardKey = ThreadContext.getShardingKey();
+    if (shardKey != null && table.shardCount() > 1) {
+      throw new RuntimeException("没有重写分表规则，请实现table()方法");
+    } else {
+      if (Utils.isEmpty(table.db())) {
+        return table.name();
+      }
+      return Utils.connect(table.db(), '.', table.name());
+    }
+  }
+
+  public String keyColumn() {
+    return table.keyColumn();
   }
   
   /**
@@ -176,7 +186,7 @@ public class AbstractGenericDao<ENTITY> {
    * @return 删除条数 created by Tianxin on 2015年6月3日 下午8:34:03
    */
   protected int delete(Matches matches) {
-    QueryDelete query = new QueryDelete(matches, writeHandler.table());
+    QueryDelete query = new QueryDelete(matches, table());
     String sql = query.getSQL();
     Object[] args = query.getParams();
     LOG.info(Utils.toLogSQL(sql, args));
@@ -191,7 +201,7 @@ public class AbstractGenericDao<ENTITY> {
    * @return
    */
   protected int update(Modifies modifies, Matches matches) {
-    QueryModify modify = new QueryModify(modifies, matches, configKeeper.table());
+    QueryModify modify = new QueryModify(modifies, matches, table());
     String sql = modify.getSQL();
     Object[] args = modify.getParams();
     LOG.info(Utils.toLogSQL(sql, args));
@@ -285,7 +295,7 @@ public class AbstractGenericDao<ENTITY> {
   protected <E> E findOne(Class<E> eclass, Matches matches, Orders orders, String...columns) {
     
     List<String> choozenColumns = Arrays.asList(columns);
-    QuerySelect query = new QuerySelect(choozenColumns, matches, orders, configKeeper.table(), 0, 1);
+    QuerySelect query = new QuerySelect(choozenColumns, matches, orders, table(), 0, 1);
     
     String sql = query.getSQL();
     Object[] params = query.getParams();
@@ -348,7 +358,7 @@ public class AbstractGenericDao<ENTITY> {
    */
   protected List<ENTITY> pageColumns(Matches matches, Orders orders, int offset, int rows, String... columns) {
     List<String> choozenColumns = Arrays.asList(columns);
-    QuerySelect query = new QuerySelect(choozenColumns, matches, orders, configKeeper.table(), offset, rows);
+    QuerySelect query = new QuerySelect(choozenColumns, matches, orders, table(), offset, rows);
     String sql = query.getSQL();
     Object[] params = query.getParams();
     LOG.info(Utils.toLogSQL(sql, params));
@@ -420,7 +430,7 @@ public class AbstractGenericDao<ENTITY> {
    */
   protected <E extends Serializable> List<E> pageOneColumn(Class<E> eClass, Matches matches, Orders orders, String column, int offset, int rows) {
     List<String> columns = Arrays.asList(column);
-    QuerySelect query = new QuerySelect(columns, matches, orders, configKeeper.table(), offset, rows);
+    QuerySelect query = new QuerySelect(columns, matches, orders, table(), offset, rows);
     String sql = query.getSQL();
     Object[] params = query.getParams();
     return findBySQL(eClass, sql, params);
@@ -494,7 +504,7 @@ public class AbstractGenericDao<ENTITY> {
    */
   protected int count(Matches matches) {
     List<String> columns = Arrays.asList("count(1)");
-    QuerySelect query = new QuerySelect(columns, matches, null, configKeeper.table());
+    QuerySelect query = new QuerySelect(columns, matches, null, table());
     String sql = query.getSQL();
     Object[] params = query.getParams();
     return countBySQL(sql, params);
@@ -520,7 +530,7 @@ public class AbstractGenericDao<ENTITY> {
    * @return created by Tianxin on 2015年6月3日 下午8:52:01
    */
   protected int countDistinct(Matches matches, String... targetColumns) {
-    Query query = new QueryDistinctCount(configKeeper.table(), matches, targetColumns);
+    Query query = new QueryDistinctCount(table(), matches, targetColumns);
 
     String sql = query.getSQL();
     Object[] params = query.getParams();
@@ -578,7 +588,7 @@ public class AbstractGenericDao<ENTITY> {
    * <br/>created by Tianxin on 2015年8月4日 上午11:06:29
    */
   public void truncate(){
-    String sql = "truncate table " + configKeeper.table();
+    String sql = "truncate table " + table();
     executeBySQL(sql);
   }
   
