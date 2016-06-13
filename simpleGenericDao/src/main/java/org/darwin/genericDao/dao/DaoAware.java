@@ -7,7 +7,6 @@ package org.darwin.genericDao.dao;
 import java.util.Collection;
 import java.util.List;
 
-
 /**
  * 
  * <br/>created by Tianxin on 2015年7月8日 上午11:35:53

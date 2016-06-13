@@ -17,17 +17,17 @@ import org.darwin.genericDao.mapper.ColumnMapper;
 /**
  * created by Tianxin on 2015年5月27日 下午6:46:45
  */
-public class WriteSQLHandler<ENTITY> {
+public class WriteHandler<ENTITY> {
 
   //私有化无参构造器
-  private WriteSQLHandler() {}
+  private WriteHandler() {}
 
 
   /**
    * @param columnMappers
    * @param configKeeper
    */
-  public WriteSQLHandler(Map<String, ColumnMapper> columnMappers, TableAware tableAware) {
+  public WriteHandler(Map<String, ColumnMapper> columnMappers, TableAware tableAware) {
 
     this();
     this.tableAware = tableAware;

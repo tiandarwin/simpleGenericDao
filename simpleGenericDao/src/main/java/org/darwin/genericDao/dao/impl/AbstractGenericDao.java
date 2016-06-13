@@ -56,12 +56,12 @@ public class AbstractGenericDao<ENTITY> implements TableAware {
 
     this.entityClass = entityClass;
     this.columnMappers = GenericDaoUtils.generateColumnMappers(entityClass, table.columnStyle());
-    this.writeHandler = new WriteSQLHandler<ENTITY>(columnMappers, this);
+    this.writeHandler = new WriteHandler<ENTITY>(columnMappers, this);
   }
 
   protected Class<ENTITY> entityClass;
   protected JdbcTemplate jdbcTemplate;
-  protected WriteSQLHandler<ENTITY> writeHandler;
+  protected WriteHandler<ENTITY> writeHandler;
   protected Map<String, ColumnMapper> columnMappers;
 
   private Table table;
