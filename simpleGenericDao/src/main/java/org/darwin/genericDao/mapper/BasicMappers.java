@@ -27,19 +27,19 @@ public class BasicMappers {
   private static Map<Class<?>, Map<String, ColumnMapper>> columnMappersMap = Utils.newMap(64);
 
   private static Map<Class<?>, Class<?>> entityKeyClassMap = Utils.newMap(16);
-  
+
   public static <ENTITY> List<ColumnMapper> getMappers(Class<?> entityClass) {
-    
+
     //object截止
-    if(entityClass.equals(Object.class)){
+    if (entityClass.equals(Object.class)) {
       return null;
     }
-    
+
     Map<String, ColumnMapper> mappers = columnMappersMap.get(entityClass);
-    if(mappers == null){
+    if (mappers == null) {
       entityClass = entityClass.getSuperclass();
       return getMappers(entityClass);
-    }else {
+    } else {
       return new ArrayList<ColumnMapper>(mappers.values());
     }
   }
@@ -93,7 +93,7 @@ public class BasicMappers {
 
     //看是否是基本类型
     RowMapper<ENTITY> mapper = getMapper(eClass, true);
-    if(mapper != null){
+    if (mapper != null) {
       return mapper;
     }
 
@@ -110,11 +110,11 @@ public class BasicMappers {
    * @return created by Tianxin on 2015年6月1日 下午1:49:42
    */
   private static <R> RowMapper<R> getMapper(Class<R> rClass, boolean nullable) {
-    
-    if(nullable && !FetcherCache.contains(rClass)){
+
+    if (nullable && !FetcherCache.contains(rClass)) {
       return null;
     }
-    
+
     final TypeFetcher fetcher = FetcherCache.getFetcher(rClass);
     return new RowMapper<R>() {
 
@@ -124,7 +124,7 @@ public class BasicMappers {
       }
     };
   }
-  
+
   /**
    * 获取一个基础类的mapper
    * 

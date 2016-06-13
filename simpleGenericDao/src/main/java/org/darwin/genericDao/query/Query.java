@@ -22,5 +22,5 @@ public interface Query {
    * created by Tianxin on 2015年5月27日 下午3:05:59
    */
   Object[] getParams();
-  
-}   
+
+}

@@ -18,25 +18,26 @@ import org.slf4j.LoggerFactory;
  * <br/>created by Tianxin on 2015年7月16日 下午12:52:22
  */
 public class Replaces {
-  
+
   private List<Replace> list = new ArrayList<Replace>(5);
-  
+
   /**
    * 一个替换对象
    * 
    * <br/>created by Tianxin on 2015年7月16日 下午1:00:22
    */
-  private static class Replace{
+  private static class Replace {
 
     /**
      * 占位符
      */
     private String label;
-    
+
     /**
      * 替换为的值
      */
     private Object value;
+
     /**
      * 构造函数
      * @param label
@@ -46,36 +47,37 @@ public class Replaces {
       this.label = label;
       this.value = value;
     }
+
     /**
      * 获取当前value的数据库值
      * @return
      * <br/>created by Tianxin on 2015年8月26日 下午4:04:38
      */
     public String value() {
-      if(value == null){
+      if (value == null) {
         return String.valueOf(value);
       }
-      
-      if(value instanceof Date){
-        return Utils.connect('\'', DateUtils.format((Date)value), '\'');
+
+      if (value instanceof Date) {
+        return Utils.connect('\'', DateUtils.format((Date) value), '\'');
       }
-      
-      if(value instanceof String){
-        if(label.equals("#table")){
+
+      if (value instanceof String) {
+        if (label.equals("#table")) {
           return String.valueOf(value);
-        }else{
+        } else {
           return Utils.connect('\'', value, '\'');
         }
       }
-      
-      if(value instanceof Boolean){
-        return ((Boolean)value) ? "1" : "0";
+
+      if (value instanceof Boolean) {
+        return ((Boolean) value) ? "1" : "0";
       }
-      
+
       return String.valueOf(value);
     }
   }
-  
+
   public static Logger getLog() {
     return LOG;
   }
@@ -92,13 +94,13 @@ public class Replaces {
    * <br/>created by Tianxin on 2015年7月16日 下午12:56:26
    */
   public String execute(String sql) {
-    for(Replace r : list){
+    for (Replace r : list) {
       sql = sql.replaceAll(r.label, r.value());
     }
     return sql;
   }
-  
-  public static Replaces one(String label, Object value){
+
+  public static Replaces one(String label, Object value) {
     return new Replaces().replace(label, value);
   }
 

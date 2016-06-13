@@ -17,7 +17,7 @@ public interface TableAware {
    * <br/>created by Tianxin on 2016年6月13日 上午10:56:08
    */
   String table();
-  
+
   /**
    * 获取主键的字段名
    * @return

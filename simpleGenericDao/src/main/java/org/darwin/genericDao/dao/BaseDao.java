@@ -21,7 +21,7 @@ public interface BaseDao<KEY extends Serializable, ENTITY extends BaseObject<KEY
    * created by Tianxin on 2015年5月26日 下午9:16:51
    */
   int replace(Collection<ENTITY> entities);
-  
+
   /**
    * 如果存在ID相同的数据则update，如果不存在则创建
    * created by Tianxin on 2015年5月26日 下午9:16:51

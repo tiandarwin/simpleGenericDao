@@ -14,38 +14,38 @@ import org.darwin.common.utils.Utils;
  */
 public class LikeParam implements Param {
 
-	private boolean leftStrict = false;
-	private boolean rightStrict = false;
-	private Object value;
+  private boolean leftStrict = false;
+  private boolean rightStrict = false;
+  private Object value;
 
-	/**
-	 * @param word
-	 */
-	public LikeParam(String word) {
-		this.value = word;
-	}
+  /**
+   * @param word
+   */
+  public LikeParam(String word) {
+    this.value = word;
+  }
 
-	/**
-	 * @param word
-	 * @param leftStrict
-	 * @param rightStrict
-	 */
-	public LikeParam(String word, boolean leftStrict, boolean rightStrict) {
-		this.value = word;
-		this.leftStrict = leftStrict;
-		this.rightStrict = rightStrict;
-	}
+  /**
+   * @param word
+   * @param leftStrict
+   * @param rightStrict
+   */
+  public LikeParam(String word, boolean leftStrict, boolean rightStrict) {
+    this.value = word;
+    this.leftStrict = leftStrict;
+    this.rightStrict = rightStrict;
+  }
 
-	public List<Object> getParams() {
-		return Arrays.asList((Object)(Utils.connect(leftStrict ? "" : "%", value, rightStrict ? "" : "%")));
-	}
+  public List<Object> getParams() {
+    return Arrays.asList((Object) (Utils.connect(leftStrict ? "" : "%", value, rightStrict ? "" : "%")));
+  }
 
-	public String buildOperate(String column) {
-		if (leftStrict && rightStrict) {
-			return Utils.connect(column, " = ?");
-		} else {
-			return Utils.connect(column, " like ?");
-		}
-	}
+  public String buildOperate(String column) {
+    if (leftStrict && rightStrict) {
+      return Utils.connect(column, " = ?");
+    } else {
+      return Utils.connect(column, " like ?");
+    }
+  }
 
 }

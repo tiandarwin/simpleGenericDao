@@ -171,11 +171,11 @@ public class GenericDaoUtils {
     // 解析字段列表部分
     List<String> columns = splitColumns(sColumns);
     List<String> labels = new ArrayList<String>(columns.size());
-    for(String column : columns){
+    for (String column : columns) {
       int index = column.lastIndexOf(' ');
-      if(index == -1){
+      if (index == -1) {
         labels.add(column);
-      }else{
+      } else {
         labels.add(column.substring(index + 1));
       }
     }
@@ -192,14 +192,14 @@ public class GenericDaoUtils {
     sColumns = sColumns + ",";
     int leftBracketCount = 0;
     int start = 0;
-    for(int i = 0 ; i < sColumns.length() ; i ++){
+    for (int i = 0; i < sColumns.length(); i++) {
       char c = sColumns.charAt(i);
-      if(c == '('){
+      if (c == '(') {
         leftBracketCount += 1;
-      }else if(c == ')'){
+      } else if (c == ')') {
         leftBracketCount -= 1;
-      }else if(c == ','){
-        if(leftBracketCount == 0){
+      } else if (c == ',') {
+        if (leftBracketCount == 0) {
           columns.add(sColumns.substring(start, i));
           start = i + 1;
         }
@@ -243,25 +243,25 @@ public class GenericDaoUtils {
       return sequence;
     }
   }
-  
+
   /**
    * 获取实体的columnStyle
    * @param entityClass
    * @return
    * created by Tianxin on 2015年6月17日 下午8:17:13
    */
-  private static <ENTITY> ColumnStyle getColumnStyleFromClass(Class<ENTITY> entityClass){
-    
+  private static <ENTITY> ColumnStyle getColumnStyleFromClass(Class<ENTITY> entityClass) {
+
     //找table标签
     Table table = entityClass.getAnnotation(Table.class);
-    if(table != null){
+    if (table != null) {
       return table.columnStyle();
     }
-    
+
     //没有任何标签的，默认按照驼峰到mysql的转
     return ColumnStyle.JAVA_TO_MYSQL;
   }
-  
+
 
   /**
    * 获取entityClass中与DB的所有字段映射关系
@@ -270,8 +270,8 @@ public class GenericDaoUtils {
    * @return created by Tianxin on 2015年6月1日 上午10:26:05
    */
   public static <ENTITY> Map<String, ColumnMapper> generateColumnMappers(Class<ENTITY> entityClass, ColumnStyle columnStyle) {
-    
-    if(columnStyle == null){
+
+    if (columnStyle == null) {
       columnStyle = getColumnStyleFromClass(entityClass);
     }
 
@@ -304,13 +304,13 @@ public class GenericDaoUtils {
 
       Column column = fetchColumn(field, getter, setter, entityClass);
       StatType type = fetchColumnType(field, getter, setter, entityClass);
-      
+
       Class<?> fieldType = getter.getReturnType();
       String columnName = null;
       if (setter.getName().equals("setId") && BaseObject.class.isAssignableFrom(entityClass)) {
         fieldType = getGenericEntityClass(entityClass, BaseObject.class, 0);
-        
-        if(column == null){
+
+        if (column == null) {
           Table table = GenericDaoUtils.getTable(entityClass);
           columnName = table.keyColumn();
         }

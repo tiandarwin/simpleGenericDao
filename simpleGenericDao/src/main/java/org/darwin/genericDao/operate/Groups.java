@@ -60,12 +60,12 @@ public class Groups implements Operate {
    */
   public static Groups some(String... columns) {
     Groups groups = init();
-    for(String column : columns){
+    for (String column : columns) {
       groups.groupBy(column);
     }
     return groups;
   }
-  
+
   /**
    * 多个groupBy的方法
    * @param columns
@@ -74,7 +74,7 @@ public class Groups implements Operate {
    */
   public static Groups some(Collection<String> columns) {
     Groups groups = init();
-    for(String column : columns){
+    for (String column : columns) {
       groups.groupBy(column);
     }
     return groups;

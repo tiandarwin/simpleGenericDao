@@ -111,7 +111,7 @@ public class Matches implements Operate {
     matches.add(new Match(column, SQLParams.lt(value)));
     return this;
   }
-  
+
   /**
    * 向匹配集中增加一个le匹配关系
    * @param column

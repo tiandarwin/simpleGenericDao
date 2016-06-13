@@ -13,22 +13,22 @@ import org.darwin.common.utils.Utils;
  * created by Tianxin on 2015年5月27日 下午2:07:32
  */
 public class IncreaseParam implements Param {
-	
-	private Object value;
 
-	/**
-	 * @param value
-	 */
-	public IncreaseParam(Number value) {
-		this.value = value;
-	}
+  private Object value;
 
-	public List<Object> getParams() {
-		return Arrays.asList(value);
-	}
+  /**
+   * @param value
+   */
+  public IncreaseParam(Number value) {
+    this.value = value;
+  }
 
-	public String buildOperate(String column) {
-		return Utils.connect(column, " = ", column, "+?");
-	}
+  public List<Object> getParams() {
+    return Arrays.asList(value);
+  }
+
+  public String buildOperate(String column) {
+    return Utils.connect(column, " = ", column, "+?");
+  }
 
 }

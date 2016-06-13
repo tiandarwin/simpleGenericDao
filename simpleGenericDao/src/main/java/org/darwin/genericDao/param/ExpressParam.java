@@ -32,9 +32,9 @@ public class ExpressParam implements Param {
   }
 
   public String buildOperate(String column) {
-    if(column == null || column.length() == 0){
+    if (column == null || column.length() == 0) {
       return expression;
-    }else{
+    } else {
       return Utils.connect(column, '=', expression);
     }
   }

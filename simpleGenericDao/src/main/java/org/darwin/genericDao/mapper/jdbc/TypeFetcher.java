@@ -12,23 +12,23 @@ import java.sql.SQLException;
  */
 public interface TypeFetcher {
 
-	/**
-	 * 从resultSet中获取第index字段的值
-	 * @param rs
-	 * @param index
-	 * @return
-	 * @throws SQLException
-	 * created by Tianxin on 2015年6月5日 下午12:09:27
-	 */
-	Object getFromResultSet(ResultSet rs, int index) throws SQLException;
-	
-	/**
-	 * 从resultSet中获取第label字段的值
-	 * @param rs
-	 * @param index
-	 * @return
-	 * @throws SQLException
-	 * created by Tianxin on 2015年6月5日 下午12:09:27
-	 */
-	Object getFromResultSet(ResultSet rs, String label) throws SQLException;
+  /**
+   * 从resultSet中获取第index字段的值
+   * @param rs
+   * @param index
+   * @return
+   * @throws SQLException
+   * created by Tianxin on 2015年6月5日 下午12:09:27
+   */
+  Object getFromResultSet(ResultSet rs, int index) throws SQLException;
+
+  /**
+   * 从resultSet中获取第label字段的值
+   * @param rs
+   * @param index
+   * @return
+   * @throws SQLException
+   * created by Tianxin on 2015年6月5日 下午12:09:27
+   */
+  Object getFromResultSet(ResultSet rs, String label) throws SQLException;
 }

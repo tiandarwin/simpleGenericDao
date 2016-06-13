@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * 统计表的默认DAO实现
  * created by Tianxin on 2015年6月3日 下午2:05:00
  */
-public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implements BaseStatDao<ENTITY>{
+public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implements BaseStatDao<ENTITY> {
 
   /**
    * static slf4j logger instance
@@ -50,26 +50,26 @@ public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implement
   private void analysisColumns(Map<String, ColumnMapper> columnMappers) {
     Collection<ColumnMapper> mappers = columnMappers.values();
     for (ColumnMapper mapper : mappers) {
-      
+
       //获取statType与操作符
       StatType statType = mapper.getType();
       Type type = statType == null ? Type.KEY : statType.value();
 
       // 将字段处理好之后放到columns中
       String sqlColumn = mapper.getSQLColumn();
-      if(type.value() != null){
+      if (type.value() != null) {
         sqlColumn = Utils.connect(type.value(), "(", sqlColumn, ") as ", sqlColumn);
       }
       allColumns.add(sqlColumn);
-      
+
       //时间字段
-      if(type == Type.DATE){
+      if (type == Type.DATE) {
         keyColumns.add(sqlColumn);
         dateColumn = sqlColumn;
       }
-      
+
       //key字段
-      if(type == Type.KEY){
+      if (type == Type.KEY) {
         keyColumns.add(sqlColumn);
       }
     }
@@ -107,7 +107,7 @@ public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implement
 
     return entities.get(0);
   }
-  
+
   /**
    * 根据匹配条件，分组规则，排序规则进行统计
    * 
@@ -119,7 +119,7 @@ public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implement
   public <E> List<E> statOneColumnByMgo(Matches matches, Groups groups, Orders orders, String column, Class<E> eClass) {
     return statPageOneColumnByMgo(matches, groups, orders, column, eClass, 0, 0);
   }
-  
+
   /**
    * 根据匹配条件，分组规则，排序规则进行统计
    * 
@@ -129,7 +129,7 @@ public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implement
    * @return created by Tianxin on 2015年6月4日 下午8:23:27
    */
   public <E> List<E> statPageOneColumnByMgo(Matches matches, Groups groups, Orders orders, String column, Class<E> eClass, int offset, int rows) {
-    QueryStat query = new QueryStat( Arrays.asList(column), matches, groups, orders, table(), offset, rows);
+    QueryStat query = new QueryStat(Arrays.asList(column), matches, groups, orders, table(), offset, rows);
     String sql = query.getSQL();
     Object[] params = query.getParams();
     LOG.info(Utils.toLogSQL(sql, params));

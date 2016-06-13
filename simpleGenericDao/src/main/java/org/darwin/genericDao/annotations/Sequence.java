@@ -19,17 +19,17 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Sequence {
 
-    /**
-     * sequence的名字
-     * 
-     * @return 下午1:22:37 created by Darwin(Tianxin)
-     */
-    String name();
+  /**
+   * sequence的名字
+   * 
+   * @return 下午1:22:37 created by Darwin(Tianxin)
+   */
+  String name();
 
-    /**
-     * 该Sequence每次缓存多少个ID
-     * 
-     * @return 下午1:22:49 created by Darwin(Tianxin)
-     */
-    int size() default 1000;
+  /**
+   * 该Sequence每次缓存多少个ID
+   * 
+   * @return 下午1:22:49 created by Darwin(Tianxin)
+   */
+  int size() default 1000;
 }

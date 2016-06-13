@@ -26,22 +26,22 @@ public class FetcherCache {
   public final static boolean contains(Class<?> typeClass) {
     return cache.containsKey(typeClass);
   }
-  
+
   /**
    * trim掉label周边的无用字符
    * @param label
    * @return
    * <br/>created by Tianxin on 2015年8月7日 下午4:06:42
    */
-  public final static String trimColumnLabel(String label){
+  public final static String trimColumnLabel(String label) {
     char space = ' ', point = '`';
-    if(label.indexOf(space) < 0 && label.indexOf(point) < 0){
+    if (label.indexOf(space) < 0 && label.indexOf(point) < 0) {
       return label;
     }
-    
+
     StringBuilder sb = new StringBuilder();
-    for(char c : label.toCharArray()){
-      if(c == point || c == space){
+    for (char c : label.toCharArray()) {
+      if (c == point || c == space) {
         continue;
       }
       sb.append(c);

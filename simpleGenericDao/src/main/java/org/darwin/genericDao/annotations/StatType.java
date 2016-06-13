@@ -16,14 +16,14 @@ import org.darwin.genericDao.annotations.enums.Type;
  * created by Tianxin on 2015年6月3日 下午1:48:02
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD, ElementType.METHOD })
-public @interface StatType{
-	
-	/**
-	 * 该字段对应的统计类型，默认是sum类型
-	 * @return
-	 * created by Tianxin on 2015年6月3日 下午1:54:15
-	 */
-	Type value() default Type.SUM;
-	
+@Target({ElementType.FIELD, ElementType.METHOD})
+public @interface StatType {
+
+  /**
+   * 该字段对应的统计类型，默认是sum类型
+   * @return
+   * created by Tianxin on 2015年6月3日 下午1:54:15
+   */
+  Type value() default Type.SUM;
+
 }

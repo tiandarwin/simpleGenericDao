@@ -34,7 +34,7 @@ public class CreateTableHelper {
     System.out.println("create table " + table.name() + "(");
     Map<String, ColumnMapper> mappers =
         GenericDaoUtils.generateColumnMappers(entityClass, table == null ? ColumnStyle.JAVA_TO_MYSQL : table.columnStyle());
-    
+
     for (Entry<String, ColumnMapper> entry : mappers.entrySet()) {
       String column = entry.getKey();
 

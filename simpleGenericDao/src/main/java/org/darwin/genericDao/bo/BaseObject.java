@@ -12,13 +12,13 @@ import java.io.Serializable;
  */
 public class BaseObject<KEY extends Serializable> {
 
-	private KEY id;
+  private KEY id;
 
-	public KEY getId() {
-		return id;
-	}
+  public KEY getId() {
+    return id;
+  }
 
-	public void setId(KEY id) {
-		this.id = id;
-	}
+  public void setId(KEY id) {
+    this.id = id;
+  }
 }

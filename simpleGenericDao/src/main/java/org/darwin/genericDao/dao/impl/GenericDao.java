@@ -30,7 +30,7 @@ import org.springframework.jdbc.support.KeyHolder;
  * created by Tianxin on 2015年5月26日 下午9:20:41
  */
 public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>> extends AbstractGenericDao<ENTITY> implements BaseDao<KEY, ENTITY> {
-  
+
   /**
    * static slf4j logger instance
    */
@@ -125,11 +125,11 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
    * replace操作
    */
   public int replace(Collection<ENTITY> entities) {
-   return createCore(entities, 1);
+    return createCore(entities, 1);
   }
-  
+
   public boolean replace(ENTITY entity) {
-    List<ENTITY> list = new ArrayList<ENTITY>(1); 
+    List<ENTITY> list = new ArrayList<ENTITY>(1);
     list.add(entity);
     return createCore(list, 1) == 1;
   }
@@ -197,7 +197,7 @@ public class GenericDao<KEY extends Serializable, ENTITY extends BaseObject<KEY>
     }
     String sql = writeHandler.generateUpdateSQL(entity);
     Object[] params = writeHandler.generateUpdateParams(entity);
-    
+
     LOG.info(Utils.toLogSQL(sql, params));
     return executeBySQL(sql, params) >= 1;
   }

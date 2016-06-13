@@ -11,6 +11,7 @@ import java.util.List;
  */
 public interface Param {
 
-	List<Object> getParams();
-	String buildOperate(String column);
+  List<Object> getParams();
+
+  String buildOperate(String column);
 }

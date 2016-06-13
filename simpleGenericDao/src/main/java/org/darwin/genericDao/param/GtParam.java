@@ -13,25 +13,25 @@ import org.darwin.common.utils.Utils;
  * created by Tianxin on 2015年5月27日 下午2:03:51
  */
 public class GtParam implements Param {
-	
-	private Object floor;
-	private boolean withEqual;
 
-	/**
-	 * @param floor
-	 * @param b
-	 */
-	public GtParam(Object floor, boolean withEqual) {
-		this.floor = floor;
-		this.withEqual = withEqual;
-	}
+  private Object floor;
+  private boolean withEqual;
 
-	public List<Object> getParams() {
-		return Arrays.asList(floor);
-	}
+  /**
+   * @param floor
+   * @param b
+   */
+  public GtParam(Object floor, boolean withEqual) {
+    this.floor = floor;
+    this.withEqual = withEqual;
+  }
 
-	public String buildOperate(String column) {
-		return Utils.connect(column, withEqual ? " >= ?" : " > ?");
-	}
+  public List<Object> getParams() {
+    return Arrays.asList(floor);
+  }
+
+  public String buildOperate(String column) {
+    return Utils.connect(column, withEqual ? " >= ?" : " > ?");
+  }
 
 }

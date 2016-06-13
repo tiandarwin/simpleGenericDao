@@ -8,6 +8,6 @@ package org.darwin.genericDao.annotations.enums;
  * created by Tianxin on 2015年6月3日 下午2:09:26
  */
 public enum TimeType {
-	DAY
+  DAY
 
 }

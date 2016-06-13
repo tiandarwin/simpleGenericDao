@@ -11,22 +11,22 @@ import java.io.Serializable;
  * created by Tianxin on 2015年5月26日 下午8:20:38
  */
 public class UserObject<KEY extends Serializable> extends BaseObject<KEY> {
-	
-	public static class Columns{
-		public final static String userId = "userid";
-	}
 
-	/**
-	 * 对象所属的用户的ID
-	 */
-	private int userId;
+  public static class Columns {
+    public final static String userId = "userid";
+  }
 
-	public int getUserId() {
-		return userId;
-	}
+  /**
+   * 对象所属的用户的ID
+   */
+  private int userId;
 
-	public void setUserId(int userId) {
-		this.userId = userId;
-	}
-	
+  public int getUserId() {
+    return userId;
+  }
+
+  public void setUserId(int userId) {
+    this.userId = userId;
+  }
+
 }

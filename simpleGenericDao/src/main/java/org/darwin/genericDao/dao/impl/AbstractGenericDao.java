@@ -38,19 +38,19 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * 虚拟的通用dao
  * <br/>created by Tianxin on 2015年6月24日 下午5:33:04
  */
-public class AbstractGenericDao<ENTITY> implements TableAware{
+public class AbstractGenericDao<ENTITY> implements TableAware {
   /**
    * 默认生成的该类的LOG记录器，使用slf4j组件。避免产生编译警告，使用protected修饰符。
    */
   protected final static Logger LOG = LoggerFactory.getLogger(AbstractGenericDao.class);
-  
+
   /**
    * 构造函数
    */
   public AbstractGenericDao() {
-    
+
     Class<ENTITY> entityClass = GenericDaoUtils.getGenericEntityClass(this.getClass(), AbstractGenericDao.class, 0);
-    
+
     table = GenericDaoUtils.getTable(entityClass);
     seqConfig = GenericDaoUtils.getSequence(entityClass);
 
@@ -58,15 +58,15 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
     this.columnMappers = GenericDaoUtils.generateColumnMappers(entityClass, table.columnStyle());
     this.writeHandler = new WriteSQLHandler<ENTITY>(columnMappers, this);
   }
-  
+
   protected Class<ENTITY> entityClass;
   protected JdbcTemplate jdbcTemplate;
   protected WriteSQLHandler<ENTITY> writeHandler;
   protected Map<String, ColumnMapper> columnMappers;
-  
+
   private Table table;
   protected Sequence seqConfig;
-  
+
   public String table() {
     Object shardKey = ThreadContext.getShardingKey();
     if (shardKey != null && table.shardCount() > 1) {
@@ -82,7 +82,7 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
   public String keyColumn() {
     return table.keyColumn();
   }
-  
+
   /**
    * 新建一个对象
    * @param entity
@@ -100,48 +100,48 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
    * <br/>created by Tianxin on 2015年6月24日 下午5:49:40
    */
   public int create(Collection<ENTITY> entities) {
-    if(Utils.isEmpty(entities)){
-      return 0; 
+    if (Utils.isEmpty(entities)) {
+      return 0;
     }
-    
+
     //如果不足分批，则直接插入
     int maxBatchSize = 10000;
-    if(entities.size() <= maxBatchSize){
+    if (entities.size() <= maxBatchSize) {
       return createCore(entities);
     }
-    
+
     //每积攒一个批次执行一次 
     int count = 0;
     List<ENTITY> batch = new ArrayList<ENTITY>(maxBatchSize);
-    for(ENTITY e : entities){
+    for (ENTITY e : entities) {
       batch.add(e);
-      if(batch.size() == maxBatchSize){
+      if (batch.size() == maxBatchSize) {
         count += createCore(batch);
         batch.clear();
       }
     }
-    
+
     //剩余的执行一次
     count += createCore(batch);
     return count;
   }
-  
+
   /**
    * 执行insert动作的操作
    * @param entities
    * @return
    * <br/>created by Tianxin on 2015年8月4日 上午11:01:01
    */
-  protected int createCore(Collection<ENTITY> entities){
-    if(Utils.isEmpty(entities)){
-      return 0; 
+  protected int createCore(Collection<ENTITY> entities) {
+    if (Utils.isEmpty(entities)) {
+      return 0;
     }
     String sql = writeHandler.generateInsertSQL(entities);
     Object[] args = writeHandler.generateInsertParams(entities);
     LOG.info(Utils.toLogSQL(sql, args));
     return executeBySQL(sql, args);
   }
-  
+
   /**
    * 执行insert动作的操作
    * @param entities
@@ -149,16 +149,16 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
    * @return
    * <br/>created by Tianxin on 2015年8月4日 上午11:01:01
    */
-  protected int createCore(Collection<ENTITY> entities, int type){
-    if(Utils.isEmpty(entities)){
-      return 0; 
+  protected int createCore(Collection<ENTITY> entities, int type) {
+    if (Utils.isEmpty(entities)) {
+      return 0;
     }
     String sql = writeHandler.generateInsertSQL(entities, type);
     Object[] args = writeHandler.generateInsertParams(entities);
     LOG.info(Utils.toLogSQL(sql, args));
     return executeBySQL(sql, args);
   }
-  
+
   /**
    * 如果column的取值match到了value则进行删除
    * 
@@ -169,13 +169,13 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
   protected int delete(String column, Object value) {
     return delete(Matches.one(column, value));
   }
-  
+
   /**
    * 删除全部记录
    * @return
    * <br/>created by Tianxin on 2015年8月4日 上午10:59:50
    */
-  public int deleteAll(){
+  public int deleteAll() {
     return delete(Matches.empty());
   }
 
@@ -284,7 +284,7 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
     }
     return entities.get(0);
   }
-  
+
   /**
    * 获取符合匹配条件的按orders排序后的第一调数据
    * 
@@ -292,19 +292,19 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
    * @param orders 排序规则，可为null
    * @return created by Tianxin on 2015年6月3日 下午8:46:29
    */
-  protected <E> E findOne(Class<E> eclass, Matches matches, Orders orders, String...columns) {
-    
+  protected <E> E findOne(Class<E> eclass, Matches matches, Orders orders, String... columns) {
+
     List<String> choozenColumns = Arrays.asList(columns);
     QuerySelect query = new QuerySelect(choozenColumns, matches, orders, table(), 0, 1);
-    
+
     String sql = query.getSQL();
     Object[] params = query.getParams();
     LOG.info(Utils.toLogSQL(sql, params));
-    
+
     List<E> es = findBySQL(eclass, sql, params);
-    if(es == null || es.size() == 0){
+    if (es == null || es.size() == 0) {
       return null;
-    }else{
+    } else {
       return es.get(0);
     }
   }
@@ -364,7 +364,7 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
     LOG.info(Utils.toLogSQL(sql, params));
     return findBySQL(entityClass, sql, params);
   }
-  
+
   /**
    * 执行一个sql，将查询结果装载到目标类对象中。没有记录则返回null，有记录返回第一个。
    * @param eClass
@@ -373,15 +373,15 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
    * @return
    * <br/>created by Tianxin on 2015年8月4日 上午10:48:27
    */
-  protected <E> E findOne(Class<E> eClass, String sql, Object...params){
+  protected <E> E findOne(Class<E> eClass, String sql, Object... params) {
     List<E> rs = findBySQL(eClass, sql, params);
-    if(rs.size() == 0){
+    if (rs.size() == 0) {
       return null;
-    }else{
+    } else {
       return rs.get(0);
     }
   }
-  
+
   /**
    * 执行一个sql，将查询结果加载为目标类的列表
    * @param eClass
@@ -390,7 +390,7 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
    * @return
    * <br/>created by Tianxin on 2015年8月4日 上午10:49:02
    */
-  protected <E> List<E> findBySQL(Class<E> eClass, String sql, Object...params){
+  protected <E> List<E> findBySQL(Class<E> eClass, String sql, Object... params) {
     return jdbcTemplate.query(sql, params, BasicMappers.getEntityMapper(eClass, sql));
   }
 
@@ -405,7 +405,7 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
   protected <E extends Serializable> List<E> findOneColumn(Class<E> eClass, Matches matches, String column) {
     return pageOneColumn(eClass, matches, null, column, 0, 0);
   }
-  
+
   /**
    * 查询某一列，并且用distinct做排重
    * 
@@ -435,11 +435,11 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
     Object[] params = query.getParams();
     return findBySQL(eClass, sql, params);
   }
-  
-  protected List<ENTITY> find(Query query){
+
+  protected List<ENTITY> find(Query query) {
     return find(query, entityClass);
   }
-  
+
   /**
    * 如果是没有group by的统计SQL，且where条件没有任何匹配，则query
    * @param query
@@ -447,16 +447,16 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
    * @return
    * <br/>created by Tianxin on 2015年9月24日 上午11:12:24
    */
-  protected <E> List<E> findByStatQuery(QueryStat query, Class<E> eClass, boolean checkCount){
-    
+  protected <E> List<E> findByStatQuery(QueryStat query, Class<E> eClass, boolean checkCount) {
+
     //一个统计SQL没有groupBy，并且有sum avg count max min这些统计函数时，则需要判断数量
-    if(checkCount){
+    if (checkCount) {
       ENTITY first = findOne((query).getMatches());
-      if(first == null){
+      if (first == null) {
         return new ArrayList<E>(0);
       }
     }
-    
+
     String sql = query.getSQL();
     Object[] params = query.getParams();
     LOG.info(Utils.toLogSQL(sql, params));
@@ -470,8 +470,8 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
    * @return
    * <br/>created by Tianxin on 2015年9月24日 上午11:12:24
    */
-  protected <E> List<E> find(Query query, Class<E> eClass){
-    
+  protected <E> List<E> find(Query query, Class<E> eClass) {
+
     String sql = query.getSQL();
     Object[] params = query.getParams();
     LOG.info(Utils.toLogSQL(sql, params));
@@ -557,7 +557,7 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
   public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
     this.jdbcTemplate = jdbcTemplate;
   }
-  
+
   /**
    * 执行一个SQL，SQL中有替换字符，将其按照replace规定的进行替换。注意：这里不是prepareStatement，只是直接做字符串替换。
    * @param sql
@@ -565,11 +565,11 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
    * @return
    * <br/>created by Tianxin on 2015年8月4日 上午11:05:28
    */
-  protected int executeBySQL(String sql, Replaces replaces){
+  protected int executeBySQL(String sql, Replaces replaces) {
     sql = replaces.execute(sql);
     return executeBySQL(sql);
   }
-  
+
   /**
    * 执行一个SQL
    * @param sql
@@ -577,21 +577,21 @@ public class AbstractGenericDao<ENTITY> implements TableAware{
    * @return
    * <br/>created by Tianxin on 2015年8月4日 上午11:06:19
    */
-  protected int executeBySQL(String sql, Object...args){
+  protected int executeBySQL(String sql, Object... args) {
     LOG.info(Utils.toLogSQL(sql, args));
     return jdbcTemplate.update(sql, args);
   }
-  
+
   /**
    * 以truncate的方式清空一张表的数据
    * 
    * <br/>created by Tianxin on 2015年8月4日 上午11:06:29
    */
-  public void truncate(){
+  public void truncate() {
     String sql = "truncate table " + table();
     executeBySQL(sql);
   }
-  
+
   //方便引用的字段builder
   protected final static ColumnBuilder MAX = ColumnBuilder.MAX;
   protected final static ColumnBuilder MIN = ColumnBuilder.MIN;

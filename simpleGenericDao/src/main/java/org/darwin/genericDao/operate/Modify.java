@@ -39,7 +39,7 @@ public class Modify implements Operate {
 
   public List<Object> getParams() {
     List<Object> params = param.getParams();
-    
+
     //如果返回是一个空集合，则证明是要设置为null
     if (params.size() == 0) {
       params = new ArrayList<Object>(0);

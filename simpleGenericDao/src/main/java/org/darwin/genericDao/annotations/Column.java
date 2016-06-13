@@ -14,20 +14,20 @@ import java.lang.annotation.Target;
  * created by Tianxin on 2015年5月26日 下午8:28:31
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD, ElementType.METHOD })
+@Target({ElementType.FIELD, ElementType.METHOD})
 public @interface Column {
 
-    /**
-     * 数据库对应的column
-     * 
-     * @return 数据库对应的column
-     */
-    String value();
+  /**
+   * 数据库对应的column
+   * 
+   * @return 数据库对应的column
+   */
+  String value();
 
-    /**
-     * 该字段是否被修改
-     * 
-     * @return 上午10:15:15 created by Darwin(Tianxin)
-     */
-    boolean modifiable() default true;
+  /**
+   * 该字段是否被修改
+   * 
+   * @return 上午10:15:15 created by Darwin(Tianxin)
+   */
+  boolean modifiable() default true;
 }
