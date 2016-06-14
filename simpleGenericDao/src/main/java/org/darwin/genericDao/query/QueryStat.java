@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.darwin.common.utils.Utils;
 import org.darwin.genericDao.operate.Groups;
+import org.darwin.genericDao.operate.HintCtx;
 import org.darwin.genericDao.operate.Matches;
 import org.darwin.genericDao.operate.Orders;
 
@@ -121,6 +122,13 @@ public class QueryStat implements Query {
     }
     sb.deleteCharAt(sb.length() - 1);
     sb.append(" from ").append(table);
+    
+    //如果有强制索引的设定
+    String forceIndex = HintCtx.getForceIndex();
+    if(forceIndex != null){
+      sb.append(" force index(").append(forceIndex).append(')');
+    }
+    
     if (matches != null && !matches.isEmpty()) {
       sb.append(" where ").append(matches.getOperate());
     }
