@@ -1,0 +1,15 @@
+debug: false
+
+
+mysql:
+  druid:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3309/toilet?autoReconnect=true&autoReconnectForPools=true&useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
+    username: root
+    password: 123456
+    maxActive: 20
+    minIdle: 10
+    maxWait: 10000
+    validationQuery: /* ping */
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000

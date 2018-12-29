@@ -13,6 +13,7 @@ import java.lang.reflect.TypeVariable;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -313,6 +314,9 @@ public class GenericDaoUtils {
         if (column == null) {
           Table table = GenericDaoUtils.getTable(entityClass);
           columnName = table.keyColumn();
+          if(columnName.length() == 0 || columnName.indexOf(',') >=0){
+            throw new RuntimeException(table.name() + " 主键不支持复合主键.");
+          }
         }
       }
       ColumnMapper columnMapper = new ColumnMapper(getter, setter, fieldType, column, columnStyle, type, columnName);

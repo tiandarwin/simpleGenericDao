@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.darwin.common.utils.Utils;
+import org.darwin.genericDao.dao.ColumnNameConverter;
 import org.darwin.genericDao.operate.Groups;
 import org.darwin.genericDao.operate.HintCtx;
 import org.darwin.genericDao.operate.Matches;
@@ -114,7 +115,7 @@ public class QueryStat implements Query {
     this.rows = rows;
   }
 
-  public String getSQL() {
+  public String getSQL(ColumnNameConverter columnNameConverter) {
     StringBuilder sb = new StringBuilder(256);
     sb.append("select ");
     for (String column : columns) {
@@ -130,13 +131,13 @@ public class QueryStat implements Query {
     }
     
     if (matches != null && !matches.isEmpty()) {
-      sb.append(" where ").append(matches.getOperate());
+      sb.append(" where ").append(matches.getOperate(columnNameConverter));
     }
     if (groups != null && !groups.isEmpty()) {
-      sb.append(" group by ").append(groups.getOperate());
+      sb.append(" group by ").append(groups.getOperate(columnNameConverter));
     }
     if (orders != null && !orders.isEmpty()) {
-      sb.append(" order by ").append(orders.getOperate());
+      sb.append(" order by ").append(orders.getOperate(columnNameConverter));
     }
     if (rows != 0) {
       sb.append(" limit ").append(offset).append(',').append(rows);

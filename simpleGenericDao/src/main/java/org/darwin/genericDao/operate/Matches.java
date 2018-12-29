@@ -7,6 +7,7 @@ package org.darwin.genericDao.operate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.darwin.genericDao.dao.ColumnNameConverter;
 import org.darwin.genericDao.param.SQLParams;
 
 /**
@@ -205,17 +206,18 @@ public class Matches implements Operate {
     return this;
   }
 
-  public String getOperate() {
+
+  public String getOperate(ColumnNameConverter columnNameConverter) {
     if (matches.size() == 1) {
-      return matches.get(0).getOperate();
+      return matches.get(0).getOperate(columnNameConverter);
     }
 
     StringBuilder sb = new StringBuilder(matches.size() * 12);
     for (Operate operate : matches) {
       if (operate instanceof Matches) {
-        sb.append('(').append(operate.getOperate()).append(')').append(conj);
+        sb.append('(').append(operate.getOperate(columnNameConverter)).append(')').append(conj);
       } else {
-        sb.append(operate.getOperate()).append(conj);
+        sb.append(operate.getOperate(columnNameConverter)).append(conj);
       }
     }
     sb.delete(sb.length() - conj.length(), sb.length());

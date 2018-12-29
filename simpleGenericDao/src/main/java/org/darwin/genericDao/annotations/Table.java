@@ -11,6 +11,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.darwin.genericDao.annotations.enums.ColumnStyle;
+import org.darwin.genericDao.shard.ShardTableRule;
+import org.darwin.genericDao.shard.UnknownShardTableRule;
 
 
 /**
@@ -44,7 +46,15 @@ public @interface Table {
   int shardCount() default 0;
 
   /**
-   * 主键字段的名字，默认为<code>id</code>，复合主键时，则用逗号“,”分割
+   * 分表策略, 原有设计分表策略被前置的dao层，这种设计打破封装性，数据库的信息应该内聚到ENTITY层。
+   * 缺省值UnknownShardTableRule是为了兼容之前设计
+   *
+   * @return
+   */
+  Class<? extends ShardTableRule> shardTableRuleClass() default UnknownShardTableRule.class;
+
+  /**
+   * 主键字段的名字，默认为<code>id</code>,不支持复合主键
    * 
    * @return 主键字段的名字
    */
@@ -64,4 +74,6 @@ public @interface Table {
    * @return 映射规则 @see ColumnStyle
    */
   ColumnStyle columnStyle() default ColumnStyle.JAVA_TO_MYSQL;
+
+
 }

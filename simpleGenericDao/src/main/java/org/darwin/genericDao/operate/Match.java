@@ -6,6 +6,7 @@ package org.darwin.genericDao.operate;
 
 import java.util.List;
 
+import org.darwin.genericDao.dao.ColumnNameConverter;
 import org.darwin.genericDao.param.Param;
 import org.darwin.genericDao.param.SQLParams;
 
@@ -32,8 +33,8 @@ public class Match implements Operate {
   private String column;
   private Param param;
 
-  public String getOperate() {
-    return param.buildOperate(column);
+  public String getOperate(ColumnNameConverter columnNameConverter) {
+    return param.buildOperate(columnNameConverter.convert(column));
   }
 
   public List<Object> getParams() {

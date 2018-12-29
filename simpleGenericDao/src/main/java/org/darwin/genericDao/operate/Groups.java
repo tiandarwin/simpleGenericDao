@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import org.darwin.genericDao.dao.ColumnNameConverter;
 
 /**
  * created by Tianxin on 2015年6月3日 下午3:28:48
@@ -16,10 +17,10 @@ public class Groups implements Operate {
 
   private Groups() {}
 
-  public String getOperate() {
+  public String getOperate(ColumnNameConverter columnNameConverter) {
     StringBuilder sb = new StringBuilder(groups.size() * 10);
     for (String group : groups) {
-      sb.append(group).append(',');
+      sb.append(columnNameConverter.convert(group)).append(',');
     }
     sb.deleteCharAt(sb.length() - 1);
     return sb.toString();

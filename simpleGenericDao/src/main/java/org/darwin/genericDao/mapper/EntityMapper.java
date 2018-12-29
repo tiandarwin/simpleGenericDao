@@ -36,7 +36,7 @@ public class EntityMapper<ENTITY extends Object> implements RowMapper<ENTITY> {
   /**
    * 字段映射的集合
    */
-  private List<ColumnMapper> columnMappers = null;
+  private List<ColumnMapper> columnMappers;
 
   /**
    * 要装载的实体类的class定义

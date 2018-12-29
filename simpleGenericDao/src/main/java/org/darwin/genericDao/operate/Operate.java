@@ -5,6 +5,7 @@
 package org.darwin.genericDao.operate;
 
 import java.util.List;
+import org.darwin.genericDao.dao.ColumnNameConverter;
 
 /**
  * created by Tianxin on 2015年5月27日 下午2:15:15
@@ -15,7 +16,7 @@ public interface Operate {
    * 该操作对应的SQL中的操作字符串
    * created by Tianxin on 2015年5月27日 下午2:40:24
    */
-  String getOperate();
+  String getOperate(ColumnNameConverter columnNameConverter);
 
   /**
    * 该操作在SQL执行时的param是哪些

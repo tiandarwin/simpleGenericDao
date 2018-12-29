@@ -130,7 +130,7 @@ public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implement
    */
   public <E> List<E> statPageOneColumnByMgo(Matches matches, Groups groups, Orders orders, String column, Class<E> eClass, int offset, int rows) {
     QueryStat query = new QueryStat(Arrays.asList(column), matches, groups, orders, table(), offset, rows);
-    String sql = query.getSQL();
+    String sql = query.getSQL(columnNameConverter);
     Object[] params = query.getParams();
     LOG.info(Utils.toLogSQL(sql, params));
     return findBySQL(eClass, sql, params);
@@ -181,7 +181,7 @@ public class GenericStatDao<ENTITY> extends AbstractGenericDao<ENTITY> implement
    * @return created by Tianxin on 2015年6月3日 下午4:06:19
    */
   protected List<ENTITY> statByQuery(QueryStat query) {
-    String sql = query.getSQL();
+    String sql = query.getSQL(columnNameConverter);
     Object[] params = query.getParams();
     return findBySQL(entityClass, sql, params);
   }

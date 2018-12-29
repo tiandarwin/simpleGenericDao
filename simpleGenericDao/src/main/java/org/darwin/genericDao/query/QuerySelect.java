@@ -7,6 +7,7 @@ package org.darwin.genericDao.query;
 import java.util.Collection;
 import java.util.List;
 
+import org.darwin.genericDao.dao.ColumnNameConverter;
 import org.darwin.genericDao.operate.HintCtx;
 import org.darwin.genericDao.operate.Matches;
 import org.darwin.genericDao.operate.Orders;
@@ -56,7 +57,7 @@ public class QuerySelect implements Query {
   private int offset = 0;
   private int rows = 0;
 
-  public String getSQL() {
+  public String getSQL(ColumnNameConverter columnNameConverter) {
     StringBuilder sb = new StringBuilder(256);
     sb.append("select ").append(buildColumns()).append(" from ").append(table);
     
@@ -67,10 +68,10 @@ public class QuerySelect implements Query {
     }
     
     if (matches != null && !matches.isEmpty()) {
-      sb.append(" where ").append(matches.getOperate());
+      sb.append(" where ").append(matches.getOperate(columnNameConverter));
     }
     if (orders != null && !orders.isEmpty()) {
-      sb.append(" order by ").append(orders.getOperate());
+      sb.append(" order by ").append(orders.getOperate(columnNameConverter));
     }
 
     if (rows != 0) {

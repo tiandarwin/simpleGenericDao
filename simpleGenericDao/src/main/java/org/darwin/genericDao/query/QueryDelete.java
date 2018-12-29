@@ -6,6 +6,7 @@ package org.darwin.genericDao.query;
 
 import java.util.List;
 
+import org.darwin.genericDao.dao.ColumnNameConverter;
 import org.darwin.genericDao.operate.Matches;
 
 /**
@@ -29,12 +30,12 @@ public class QueryDelete implements Query {
   private Matches matches;
   private String table;
 
-  public String getSQL() {
+  public String getSQL(ColumnNameConverter columnNameConverter) {
     StringBuilder sb = new StringBuilder(128);
     sb.append("delete from ").append(table);
 
     if (matches != null && !matches.isEmpty()) {
-      sb.append(" where ").append(matches.getOperate());
+      sb.append(" where ").append(matches.getOperate(columnNameConverter));
     }
 
     return sb.toString();

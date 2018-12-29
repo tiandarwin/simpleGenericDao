@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration status="debug">
+  <appenders>
+    <Console name="STDOUT">
+      <ThresholdFilter level="debug" onMatch="ACCEPT"
+        onMismatch="DENY" />
+      <PatternLayout
+        pattern="[%level][%d{yyyy-MM-dd'T'HH:mm:ss.SSS}][%X{client_ip}|%t|%logger{50}:%L] %ddmsg%n"
+        charset="UTF-8" />
+    </Console>
+  </appenders>
+
+</configuration>

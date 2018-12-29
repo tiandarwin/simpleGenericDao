@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.darwin.common.utils.Utils;
+import org.darwin.genericDao.dao.ColumnNameConverter;
 
 /**
  * created by Tianxin on 2015年5月27日 下午12:08:14
@@ -40,8 +41,9 @@ public class Order implements Operate {
   private String column;
   private boolean asc;
 
-  public String getOperate() {
-    return asc ? column : Utils.connect(column, " desc");
+  public String getOperate(ColumnNameConverter columnNameConverter) {
+    String realColumn = columnNameConverter.convert(column);
+    return asc ? realColumn : Utils.connect(realColumn, " desc");
   }
 
   public List<Object> getParams() {

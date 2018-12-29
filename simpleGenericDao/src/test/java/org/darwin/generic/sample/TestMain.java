@@ -25,9 +25,9 @@ public class TestMain {
 		
 	}
 	
-	public static<DAO extends GenericDao<?, ?>> DAO getDao(Class<DAO> daoClass){
+	public static <T extends GenericDao> T getDao(Class<T> daoClass){
 		try {
-			DAO dao = daoClass.newInstance();
+			T dao = daoClass.newInstance();
 			dao.setJdbcTemplate(mockJdbcTemplate());
 			return dao;
 		} catch (Exception e) {

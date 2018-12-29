@@ -22,16 +22,20 @@ import org.darwin.genericDao.mapper.jdbc.TypeFetcher;
 public class ColumnMapper {
 
   //私有化构造函数
-  private ColumnMapper() {}
+//  private ColumnMapper() {}
 
   /**
    * 映射规则
-   * @param sqlColumn
+   *
    * @param getter
    * @param setter
+   * @param fieldType
+   * @param annotation
+   * @param columnStyle
+   * @param type
+   * @param keyColumn
    */
   public ColumnMapper(Method getter, Method setter, Class<?> fieldType, Column annotation, ColumnStyle columnStyle, StatType type, String keyColumn) {
-    this();
     this.type = type;
     this.getter = getter;
     this.setter = setter;
@@ -39,26 +43,33 @@ public class ColumnMapper {
     this.fieldType = getter.getReturnType();
 
     this.annotation = annotation;
+    fieldName = generateFieldName(setter.getName());
     if (keyColumn != null) {
       this.sqlColumn = keyColumn;
-    } else if (annotation != null) {
-      this.sqlColumn = annotation.value();
-    } else {
-      String fieldName = generateFieldName(setter.getName());
-      columnStyle = columnStyle == null ? ColumnStyle.JAVA_TO_MYSQL : columnStyle;
-      this.sqlColumn = columnStyle.convert(fieldName);
+      return;
     }
+    if (annotation != null) {
+      this.sqlColumn = annotation.value();
+      return;
+    }
+
+    columnStyle = columnStyle == null ? ColumnStyle.JAVA_TO_MYSQL : columnStyle;
+    this.sqlColumn = columnStyle.convert(fieldName);
   }
 
   /**
    * 映射规则
-   * @param sqlColumn
+   *
    * @param getter
    * @param setter
+   * @param fieldType
+   * @param annotation
+   * @param columnStyle
+   * @param type
    */
-  public ColumnMapper(Method getter, Method setter, Class<?> fieldType, Column annotation, ColumnStyle columnStyle, StatType type) {
-    this(getter, setter, fieldType, annotation, columnStyle, type, null);
-  }
+//  public ColumnMapper(Method getter, Method setter, Class<?> fieldType, Column annotation, ColumnStyle columnStyle, StatType type) {
+//    this(getter, setter, fieldType, annotation, columnStyle, type, null);
+//  }
 
   /**
    * 推导field名字
@@ -86,6 +97,7 @@ public class ColumnMapper {
    */
   private Column annotation;
   private String sqlColumn;
+  private String fieldName;
   private StatType type;
 
   /**
@@ -95,6 +107,10 @@ public class ColumnMapper {
    */
   public String getSQLColumn() {
     return sqlColumn;
+  }
+
+  public String getFieldName() {
+    return fieldName;
   }
 
   /**
@@ -112,10 +128,10 @@ public class ColumnMapper {
    * @param rs
    * @param target
    * created by Tianxin on 2015年6月5日 下午1:44:41
-   * @throws SQLException 
-   * @throws InvocationTargetException 
-   * @throws IllegalArgumentException 
-   * @throws IllegalAccessException 
+   * @throws SQLException
+   * @throws InvocationTargetException
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
    */
   public void loadColumn2Field(ResultSet rs, Object target) throws SQLException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException {

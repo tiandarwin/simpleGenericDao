@@ -4,6 +4,8 @@
  */
 package org.darwin.genericDao.query;
 
+import org.darwin.genericDao.dao.ColumnNameConverter;
+
 /**
  * created by Tianxin on 2015年5月27日 下午1:48:40
  */
@@ -14,7 +16,7 @@ public interface Query {
    * @return
    * created by Tianxin on 2015年5月27日 下午3:05:41
    */
-  String getSQL();
+  String getSQL(ColumnNameConverter columnNameConverter);
 
   /**
    * 获取一个query的参数

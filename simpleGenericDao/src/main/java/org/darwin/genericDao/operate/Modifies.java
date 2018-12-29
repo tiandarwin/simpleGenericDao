@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.darwin.genericDao.dao.ColumnNameConverter;
 import org.darwin.genericDao.mapper.BasicMappers;
 import org.darwin.genericDao.mapper.ColumnMapper;
 
@@ -118,10 +119,10 @@ public class Modifies implements Operate {
    */
   private List<Modify> modifies = new ArrayList<Modify>();
 
-  public String getOperate() {
+  public String getOperate(ColumnNameConverter columnNameConverter) {
     StringBuilder sb = new StringBuilder(modifies.size() * 10);
     for (Modify modify : modifies) {
-      sb.append(modify.getOperate()).append(',');
+      sb.append(modify.getOperate(columnNameConverter)).append(',');
     }
     sb.deleteCharAt(sb.length() - 1);
     return sb.toString();

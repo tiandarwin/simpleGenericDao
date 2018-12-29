@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.darwin.common.utils.Utils;
+import org.darwin.genericDao.dao.ColumnNameConverter;
 import org.darwin.genericDao.param.Param;
 import org.darwin.genericDao.param.SQLParams;
 
@@ -33,8 +34,8 @@ public class Modify implements Operate {
   private String column;
   private Param param;
 
-  public String getOperate() {
-    return Utils.connect(column, "=?");
+  public String getOperate(ColumnNameConverter columnNameConverter) {
+    return Utils.connect(columnNameConverter.convert(column), "=?");
   }
 
   public List<Object> getParams() {

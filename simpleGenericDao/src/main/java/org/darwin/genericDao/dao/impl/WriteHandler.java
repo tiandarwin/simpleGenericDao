@@ -15,80 +15,25 @@ import org.darwin.genericDao.dao.TableAware;
 import org.darwin.genericDao.mapper.ColumnMapper;
 
 /**
+ *
+ *
  * created by Tianxin on 2015年5月27日 下午6:46:45
+ * updated by xiufeng，精简代码
  */
-public class WriteHandler<ENTITY> {
-
-  //私有化无参构造器
-  private WriteHandler() {}
+public class WriteHandler<ENTITY> extends AbstractHandler<ENTITY> {
+  private static final String[] INSERT_OPERATES =  {"insert", "replace", "insert ignore"};
 
 
   /**
+   *
    * @param columnMappers
-   * @param configKeeper
+   * @param tableAware
    */
   public WriteHandler(Map<String, ColumnMapper> columnMappers, TableAware tableAware) {
 
-    this();
-    this.tableAware = tableAware;
-    this.columnMappers = columnMappers;
+    super(columnMappers,tableAware);
 
-    int mapperCount = columnMappers.size();
-    List<String> insertColumns = new ArrayList<String>(mapperCount);
-    List<String> updateColumns = new ArrayList<String>(mapperCount);
-    List<String> allColumns = new ArrayList<String>(mapperCount);
-
-    Collection<ColumnMapper> mappers = columnMappers.values();
-    for (ColumnMapper mapper : mappers) {
-      allColumns.add(mapper.getSQLColumn());
-      insertColumns.add(mapper.getSQLColumn());
-      if (mapper.getAnnotation() == null || mapper.getAnnotation().modifiable()) {
-        updateColumns.add(mapper.getSQLColumn());
-      }
-    }
-
-    initColumns(insertColumns, updateColumns, allColumns);
   }
-
-  /**
-   * 初始化字段列表的设置
-   * @param insertColumns
-   * @param updateColumns
-   * @param allColumns
-   * created by Tianxin on 2015年6月1日 上午6:56:20
-   */
-  private void initColumns(List<String> insertColumns, List<String> updateColumns, List<String> allColumns) {
-
-    //普通的字段保存
-    this.allColumns = allColumns;
-    this.insertColumns = insertColumns;
-    this.updateColumns = updateColumns;
-
-    //构造insert语句的字段列表与展位符
-    StringBuilder sInsertColumnBuilder = new StringBuilder(insertColumns.size() * 9);
-    StringBuilder sInsertPHolderBuilder = new StringBuilder(insertColumns.size() * 2 + 2);
-    for (String column : insertColumns) {
-      sInsertColumnBuilder.append(',').append(column);
-      sInsertPHolderBuilder.append(",?");
-    }
-    sInsertColumnBuilder.append(')').setCharAt(0, '(');
-    sInsertPHolderBuilder.append(')').setCharAt(0, '(');
-    this.sInsertColumns = sInsertColumnBuilder.toString();
-    this.sInsertPlaceHolder = sInsertPHolderBuilder.toString();
-  }
-
-  private List<String> allColumns;
-  private List<String> updateColumns;
-
-  /**
-   * insert的SQL中参数的展位符——(?,?,?,?)
-   */
-  private String sInsertPlaceHolder;
-  private List<String> insertColumns;
-  private String sInsertColumns;
-
-  private Map<String, ColumnMapper> columnMappers;
-  private TableAware tableAware;
 
 
   /**
@@ -110,24 +55,7 @@ public class WriteHandler<ENTITY> {
     return params.toArray();
   }
 
-  /**
-   * @param params
-   * @param entity
-   *            created by Tianxin on 2015年5月27日 下午8:22:04
-   */
-  private List<Object> getParamsByColumns(List<String> columns, ENTITY entity) {
-    ArrayList<Object> params = new ArrayList<Object>(columns.size() + 1);
-    for (String column : columns) {
-      try {
-        ColumnMapper cMapper = columnMappers.get(column);
-        Object value = cMapper.getGetter().invoke(entity);
-        params.add(value);
-      } catch (Exception e) {
-        throw new RuntimeException(column + "getter invoke error!", e);
-      }
-    }
-    return params;
-  }
+
 
   /**
    * 生成insert语句
@@ -147,13 +75,13 @@ public class WriteHandler<ENTITY> {
    */
   public String generateInsertSQL(Collection<ENTITY> entities, int type) {
 
-    String[] operates = new String[] {"insert", "replace", "insert ignore"};
-    if (type >= operates.length || type < 0) {
+
+    if (type >= INSERT_OPERATES.length || type < 0) {
       throw new RuntimeException("不是合法的type!");
     }
 
     StringBuilder sb = new StringBuilder(512);
-    sb.append(operates[type]).append(" into ").append(tableAware.table());
+    sb.append(INSERT_OPERATES[type]).append(" into ").append(tableAware.table());
     sb.append(' ').append(sInsertColumns).append(" values ");
     for (ENTITY entity : entities) {
       if (entity != null) {
@@ -179,21 +107,7 @@ public class WriteHandler<ENTITY> {
     throw new RuntimeException(Utils.connect(entity.getClass().getSimpleName(), " 不是BaseObject的子类!"));
   }
 
-  /**
-   * 生成update的SQL语句
-   * 
-   * @return created by Tianxin on 2015年5月27日 下午7:44:14
-   */
-  public String generateUpdateSQL(ENTITY entity) {
-    StringBuilder sb = new StringBuilder(512);
-    sb.append("update ").append(tableAware.table()).append(" set ");
-    for (String column : updateColumns) {
-      sb.append(column).append("=?,");
-    }
-    sb.setCharAt(sb.length() - 1, ' ');
-    sb.append(" where ").append(tableAware.keyColumn()).append("=?");
-    return sb.toString();
-  }
+
 
   /**
    * @return
